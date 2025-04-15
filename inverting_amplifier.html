@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Inverting Amplifier Simulator - Electronic Circuit Simulation Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <script src="home.js" defer></script>
+  <script src="back-to-top.js" defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    .simulator-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 0 20px;
+    }
+    @media (min-width: 992px) {
+      .simulator-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .circuit-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .control-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slider-group {
+      margin-bottom: 20px;
+    }
+    .slider-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #1e293b;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+      accent-color: #5a2ca0; /* Royal purple for sliders */
+    }
+    .value-display {
+      color: #475569;
+      font-size: 0.9em;
+    }
+    .chart-container {
+      margin-top: 20px;
+      height: 300px;
+    }
+    .observation-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .observation-table th, .observation-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      text-align: center;
+    }
+    .observation-table th {
+      background-color: #f8f5ff; /* Very light purple */
+      color: #1e293b;
+    }
+    .circuit-diagram {
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    .circuit-diagram svg {
+      width: 100%;
+      height: auto;
+      max-height: 500px;
+    }
+    .clear-button-container {
+      margin: 15px 0;
+      text-align: center;
+    }
+    .clear-button {
+      background-color: #e74c3c; /* Red from theme */
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .clear-button:hover {
+      filter: brightness(110%);
+    }
+    
+    /* Simulation Mode Styles */
+    body.simulation-mode .avatar-toggle {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    body.simulation-mode .main-nav ul li:not(:first-child) {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a::before {
+      content: "←";
+      margin-right: 5px;
+      font-size: 1.2em;
+    }
+    
+    body.simulation-mode .header-content {
+      padding: 0.5rem 1rem;
+    }
+    
+    body.simulation-mode .site-title {
+      font-size: 1.3rem;
+    }
+    
+    body.simulation-mode .college-name {
+      font-size: 0.75rem;
+    }
+    
+    /* Instructions Section Styles */
+    .instructions-section {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f8f5ff; /* Very light purple */
+      border-radius: 10px;
+      border-left: 4px solid #5a2ca0; /* Royal purple */
+    }
+    
+    .instructions-section h3 {
+      color: #1e293b;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    
+    .instruction-card {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    .instruction-step {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+    
+    .step-number {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 30px;
+      height: 30px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-content h4 {
+      color: #5a2ca0; /* Royal purple */
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+    }
+    
+    .step-content p {
+      margin: 0 0 10px 0;
+      line-height: 1.5;
+    }
+
+    /* Add back button styling */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 50%;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+      transition: background-color 0.2s;
+    }
+
+    .back-button:hover {
+      background-color: #4a2483; /* Darker purple */
+    }
+
+    /* Active tab style */
+    .main-nav ul li a.active {
+      color: #5a2ca0; /* Royal purple */
+      font-weight: bold;
+      border-bottom: 2px solid #5a2ca0;
+    }
+
+    .main-header {
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Dark Mode Styles */
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --section-bg: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --border-color: #334155;
+    }
+
+    [data-theme="dark"] body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .circuit-section,
+    [data-theme="dark"] .control-section {
+      background: var(--section-bg);
+      border: 1px solid var(--border-color);
+    }
+
+    [data-theme="dark"] .slider-group label,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4 {
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .value-display {
+      color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .observation-table th {
+      background-color: rgba(90, 44, 160, 0.2);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .observation-table td {
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .instructions-section {
+      background-color: rgba(90, 44, 160, 0.1);
+      border-left: 4px solid #9061c2;
+    }
+
+    [data-theme="dark"] .step-content p,
+    [data-theme="dark"] .step-content ul,
+    [data-theme="dark"] .step-content ol,
+    [data-theme="dark"] .step-content li {
+      color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .step-number {
+      background-color: #9061c2;
+    }
+
+    [data-theme="dark"] .step-content h4 {
+      color: #a55eea;
+    }
+
+    [data-theme="dark"] .main-header {
+      background-color: #9061c2;
+    }
+
+    [data-theme="dark"] rect[fill="#f8f5ff"] {
+      fill: #1e293b;
+    }
+
+    [data-theme="dark"] text[fill="#1e293b"] {
+      fill: var(--text-primary);
+    }
+
+    [data-theme="dark"] rect[fill="white"] {
+      fill: #2d3748;
+    }
+    
+    [data-theme="dark"] line[stroke="#1e293b"] {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] #wires line {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] text[fill="#475569"] {
+      fill: #cbd5e1;
+    }
+
+    [data-theme="dark"] path[stroke="#1e293b"] {
+      stroke: #94a3b8;
+    }
+
+    .download-section {
+      text-align: center;
+      margin: 20px 0;
+    }
+  </style>
+  <script>
+    // This script sets up theme syncing with the main site
+    function syncTheme() {
+      const storedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', storedTheme);
+    }
+    
+    // Apply theme on page load
+    syncTheme();
+    
+    // Listen for changes to theme in localStorage (from main site)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'theme') {
+        syncTheme();
+      }
+    });
+  </script>
+</head>
+<body class="simulation-mode" id="simulator-body">
+  <!-- Profile Sidebar -->
+  <div class="profile-sidebar" id="profileSidebar">
+    <div class="profile-content">
+      <button class="close-sidebar" id="closeSidebar">&times;</button>
+      <div class="sidebar-avatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+      <div class="profile-header">
+        <div class="profile-info">
+          <h2>Shubham Patel</h2>
+          <div class="user-level">ADVANCED LEVEL</div>
+          <p class="user-title">Electronics and Computer Science Engineering Student</p>
+          <div class="progress-container">
+            <span>Progress to next level:</span>
+            <span>75%</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-stats">
+        <div class="stat-card">
+          <span class="stat-value">12</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">3</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">5</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page Overlay -->
+  <div class="page-overlay" id="pageOverlay"></div>
+  
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-content">
+      <!-- NEW DEDICATED BACK BUTTON -->
+      <a href="index.html" class="back-button">&lt;</a>
+      
+      <div class="logo-container">
+        <h1 class="site-title">Electronic Circuit Simulation Lab</h1>
+        <p class="college-name">Shree L.R Tiwari College Of Engineering</p>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li style="display:none;"><a href="index.html">Home</a></li>
+          <li><a href="mosfet_simulator.html">MOSFET Simulator</a></li>
+          <li><a href="bjt_amplifier.html">BJT Amplifier</a></li>
+          <li><a href="inverting_amplifier.html" class="active">Inverting Amplifier</a></li>
+          <li><a href="#">Logic Gates</a></li>
+        </ul>
+      </nav>
+      <!-- Avatar Toggle Button -->
+      <div class="avatar-toggle" id="profileAvatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="simulator-container">
+    <div class="circuit-section">
+      <h2>Circuit Diagram</h2>
+      <div class="circuit-diagram">
+        <!-- SVG content for Inverting Amplifier circuit -->
+        <svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Circuit Background with clean look -->
+          <rect x="0" y="0" width="800" height="500" fill="#f8fafc" rx="10" ry="10" />
+          
+          <!-- Very subtle grid for alignment -->
+          <g stroke="#e2e8f0" stroke-width="0.5" stroke-opacity="0.5">
+            <g id="vertical-lines">
+              <line x1="100" y1="50" x2="100" y2="450" />
+              <line x1="200" y1="50" x2="200" y2="450" />
+              <line x1="300" y1="50" x2="300" y2="450" />
+              <line x1="400" y1="50" x2="400" y2="450" />
+              <line x1="500" y1="50" x2="500" y2="450" />
+              <line x1="600" y1="50" x2="600" y2="450" />
+              <line x1="700" y1="50" x2="700" y2="450" />
+            </g>
+            <g id="horizontal-lines">
+              <line x1="50" y1="100" x2="750" y2="100" />
+              <line x1="50" y1="200" x2="750" y2="200" />
+              <line x1="50" y1="300" x2="750" y2="300" />
+              <line x1="50" y1="400" x2="750" y2="400" />
+            </g>
+          </g>
+          
+          <!-- Op-Amp Parameters Box -->
+          <g id="parameters-box">
+            <rect x="500" y="50" width="250" height="100" fill="white" stroke="#2563eb" stroke-width="1" rx="5" ry="5" />
+            <text x="510" y="75" font-family="Arial" font-size="16" font-weight="bold" fill="#1e293b">Op-Amp Parameters:</text>
+            <text x="510" y="100" font-family="Arial" font-size="14" fill="#1e293b">Open Loop Gain: <tspan id="gain-param-value" fill="#1e293b">100,000</tspan></text>
+            <text x="510" y="120" font-family="Arial" font-size="14" fill="#1e293b">Supply Voltage: <tspan id="supply-param-value" fill="#1e293b">±15V</tspan></text>
+            <text x="510" y="140" font-family="Arial" font-size="14" fill="#1e293b">Input Impedance: <tspan id="input-z-param-value" fill="#1e293b">1MΩ</tspan></text>
+          </g>
+          
+          <!-- Op-Amp Symbol -->
+          <g id="opamp" transform="translate(400,250)">
+            <!-- Op-Amp Triangle -->
+            <path d="M-50,-40 L-50,40 L50,0 Z" fill="white" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Inverting Input (-)  -->
+            <line x1="-70" y1="-20" x2="-50" y2="-20" stroke="#ef4444" stroke-width="2" />
+            <text x="-45" y="-15" font-family="Arial" font-size="14" fill="#ef4444">-</text>
+            
+            <!-- Non-Inverting Input (+) -->
+            <line x1="-70" y1="20" x2="-50" y2="20" stroke="#2563eb" stroke-width="2" />
+            <text x="-45" y="25" font-family="Arial" font-size="14" fill="#2563eb">+</text>
+            
+            <!-- Output -->
+            <line x1="50" y1="0" x2="70" y2="0" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Labels -->
+            <text x="0" y="-50" font-family="Arial" font-size="14" text-anchor="middle" fill="#1e293b">Op-Amp</text>
+          </g>
+          
+          <!-- Input Resistor Ri -->
+          <g id="input-resistor" transform="translate(250,230)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L10,0 L15,-5 L25,5 L35,-5 L45,5 L55,-5 L65,5 L70,0 L80,0" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="ri-path" />
+            <!-- Label -->
+            <text x="35" y="-10" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">Ri</text>
+            <text id="ri-value-svg" x="35" y="-25" font-family="Arial" font-size="12" fill="#475569">10kΩ</text>
+          </g>
+          
+          <!-- Feedback Resistor Rf -->
+          <g id="feedback-resistor" transform="translate(400,175)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L0,10 L-5,15 L5,25 L-5,35 L5,45 L-5,55 L5,65 L0,70 L0,75" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rf-path" />
+            <!-- Label -->
+            <text x="15" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">Rf</text>
+            <text id="rf-value-svg" x="15" y="60" font-family="Arial" font-size="12" fill="#475569">100kΩ</text>
+          </g>
+          
+          <!-- Ground Symbols -->
+          <g id="ground" transform="translate(400,320)">
+            <line x1="-70" y1="-50" x2="-70" y2="-30" stroke="#1e293b" stroke-width="2" />
+            <line x1="-85" y1="-30" x2="-55" y2="-30" stroke="#1e293b" stroke-width="2" />
+            <line x1="-80" y1="-25" x2="-60" y2="-25" stroke="#1e293b" stroke-width="2" />
+            <line x1="-75" y1="-20" x2="-65" y2="-20" stroke="#1e293b" stroke-width="2" />
+          </g>
+          
+          <!-- VIN Source -->
+          <g transform="translate(150,230)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#2563eb" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#2563eb">VIN</text>
+            <text id="vin-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">2.0V</text>
+          </g>
+          
+          <!-- Output Voltage -->
+          <g transform="translate(550,250)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#ef4444" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#ef4444">VOUT</text>
+            <text id="vout-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">-20.0V</text>
+          </g>
+          
+          <!-- Load Resistor RL -->
+          <g id="load-resistor" transform="translate(650,250)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L0,10 L-5,15 L5,25 L-5,35 L5,45 L-5,55 L5,65 L0,70 L0,80" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rl-path" />
+            <!-- Label -->
+            <text x="15" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RL</text>
+            <text id="rl-value-svg" x="15" y="60" font-family="Arial" font-size="12" fill="#475569">10kΩ</text>
+          </g>
+          
+          <!-- Ground for the load -->
+          <g id="ground-load" transform="translate(650,380)">
+            <line x1="0" y1="-50" x2="0" y2="-30" stroke="#1e293b" stroke-width="2" />
+            <line x1="-15" y1="-30" x2="15" y2="-30" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="-25" x2="10" y2="-25" stroke="#1e293b" stroke-width="2" />
+            <line x1="-5" y1="-20" x2="5" y2="-20" stroke="#1e293b" stroke-width="2" />
+          </g>
+          
+          <!-- Connecting Wires -->
+          <g id="wires" stroke="#1e293b" stroke-width="2">
+            <!-- VIN to Ri -->
+            <line x1="175" y1="230" x2="250" y2="230" />
+            
+            <!-- Ri to Op-Amp -->
+            <line x1="330" y1="230" x2="330" y2="230" />
+            
+            <!-- Op-Amp output to Rf and VOUT -->
+            <line x1="470" y1="250" x2="525" y2="250" />
+            <line x1="525" y1="250" x2="550" y2="250" />
+            <line x1="575" y1="250" x2="650" y2="250" />
+            
+            <!-- Feedback from output to inverting input -->
+            <line x1="400" y1="175" x2="400" y2="160" />
+            <line x1="400" y1="160" x2="330" y2="160" />
+            <line x1="330" y1="160" x2="330" y2="230" />
+            
+            <!-- Connection to ground for non-inverting input -->
+            <line x1="330" y1="270" x2="330" y2="300" />
+            <line x1="330" y1="300" x2="330" y2="320" />
+            
+            <!-- Load to ground -->
+            <line x1="650" y1="330" x2="650" y2="330" />
+          </g>
+          
+          <!-- Current Flow Indicators -->
+          <g id="current-flow" stroke="#ef4444" stroke-width="2" fill="none">
+            <polyline points="200,230 220,230" marker-end="url(#arrowhead)" />
+            <polyline points="400,200 400,180" marker-end="url(#arrowhead)" />
+            <polyline points="500,250 520,250" marker-end="url(#arrowhead)" />
+          </g>
+          
+          <!-- Operating Point Info -->
+          <g id="operating-point">
+            <rect x="50" y="380" width="220" height="70" fill="white" stroke="#2563eb" stroke-width="1" rx="5" ry="5" />
+            <text x="60" y="400" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">Circuit Analysis:</text>
+            <text x="60" y="425" font-family="Arial" font-size="14" fill="#1e293b">Gain: <tspan id="circuit-gain-value" fill="#ef4444">-10.0</tspan></text>
+            <text x="60" y="445" font-family="Arial" font-size="14" fill="#1e293b">Current: <tspan id="current-value" fill="#ef4444">0.20mA</tspan></text>
+          </g>
+          
+          <!-- Title -->
+          <text x="400" y="30" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#1e293b">Inverting Amplifier with Op-Amp</text>
+          
+          <!-- Arrowhead Definition -->
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      
+      <!-- Instructions Section -->
+      <div class="instructions-section">
+        <h3>Experiment Instructions</h3>
+        <div class="instruction-card">
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              <h4>Understanding the Circuit</h4>
+              <p>The circuit above shows an inverting amplifier using an operational amplifier. The key components include:</p>
+              <ul>
+                <li>Op-Amp: The main active device with inverting (-) and non-inverting (+) inputs</li>
+                <li>VIN: Input voltage applied to the inverting input through Ri</li>
+                <li>Ri: Input resistor that sets the input impedance</li>
+                <li>Rf: Feedback resistor that determines the gain</li>
+                <li>RL: Load resistor that represents the output load</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              <h4>Experiment Objectives</h4>
+              <p>In this experiment, you will:</p>
+              <ul>
+                <li>Understand the operation of an inverting amplifier</li>
+                <li>Observe how changing VIN affects the output voltage</li>
+                <li>Study the effect of the Rf/Ri ratio on the gain</li>
+                <li>Analyze the current flow in the circuit</li>
+                <li>Observe op-amp saturation when output limits are reached</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              <h4>Performing the Experiment</h4>
+              <ol>
+                <li>Start by setting the input voltage VIN to a small value (e.g., 1.0V)</li>
+                <li>Observe the output voltage and gain values</li>
+                <li>Click "Add Reading" to record data points for the transfer characteristic curve</li>
+                <li>Vary VIN across its range (-10V to +10V) and observe how the output changes</li>
+                <li>Adjust the resistor values (Ri, Rf) to see their effect on the gain</li>
+                <li>Observe what happens when the output tries to exceed the op-amp's supply limits (±15V)</li>
+              </ol>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">4</span>
+            <div class="step-content">
+              <h4>Analysis Tips</h4>
+              <ul>
+                <li>The <strong>voltage gain</strong> of the inverting amplifier is -Rf/Ri</li>
+                <li>The <strong>input impedance</strong> is approximately equal to Ri</li>
+                <li>The <strong>output voltage</strong> is limited by the op-amp's supply voltages (±15V)</li>
+                <li>Note that the non-inverting input (+) is grounded, creating a virtual ground at the inverting input (-)</li>
+                <li>Observe how the transfer curve shows the linear relationship between input and output voltages</li>
+                <li>Watch for <strong>saturation</strong> when the calculated output exceeds the supply rails</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <h2>Controls</h2>
+      
+      <!-- Circuit Parameters -->
+      <div class="slider-group">
+        <label for="vin-slider">Input Voltage (V<sub>IN</sub>):</label>
+        <input type="range" id="vin-slider" min="-10" max="10" step="0.1" value="2">
+        <div class="value-display">V<sub>IN</sub> = <span id="vin-value">2.0</span> V</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="ri-slider">Input Resistor (R<sub>i</sub>):</label>
+        <input type="range" id="ri-slider" min="1" max="100" step="1" value="10">
+        <div class="value-display">R<sub>i</sub> = <span id="ri-value">10</span> kΩ</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="rf-slider">Feedback Resistor (R<sub>f</sub>):</label>
+        <input type="range" id="rf-slider" min="1" max="1000" step="1" value="100">
+        <div class="value-display">R<sub>f</sub> = <span id="rf-value">100</span> kΩ</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="rl-slider">Load Resistor (R<sub>L</sub>):</label>
+        <input type="range" id="rl-slider" min="1" max="100" step="1" value="10">
+        <div class="value-display">R<sub>L</sub> = <span id="rl-value">10</span> kΩ</div>
+      </div>
+      
+      <!-- Chart for Voltage Transfer Characteristics -->
+      <h3>Voltage Transfer Characteristics</h3>
+      <div class="clear-button-container">
+        <button id="clearDataBtn" class="clear-button">Clear Data</button>
+        <button id="addReadingBtn" class="clear-button" style="background-color: #5a2ca0; margin-left: 10px;">Add Reading</button>
+        <button id="downloadBtn" class="clear-button" style="background-color: #f39c12; margin-left: 10px;">Download Results</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="transferChart"></canvas>
+      </div>
+      
+      <!-- Observation Table -->
+      <h3>Observations</h3>
+      <div class="table-container">
+        <table class="observation-table">
+          <thead>
+            <tr>
+              <th>V<sub>IN</sub> (V)</th>
+              <th>V<sub>OUT</sub> (V)</th>
+              <th>Current (mA)</th>
+              <th>Gain</th>
+            </tr>
+          </thead>
+          <tbody id="observationTableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Get UI elements
+    const elements = {
+      vinSlider: document.getElementById('vin-slider'),
+      riSlider: document.getElementById('ri-slider'),
+      rfSlider: document.getElementById('rf-slider'),
+      rlSlider: document.getElementById('rl-slider'),
+      
+      vinValue: document.getElementById('vin-value'),
+      riValue: document.getElementById('ri-value'),
+      rfValue: document.getElementById('rf-value'),
+      rlValue: document.getElementById('rl-value'),
+      
+      clearDataBtn: document.getElementById('clearDataBtn'),
+      addReadingBtn: document.getElementById('addReadingBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      observationTableBody: document.getElementById('observationTableBody')
+    };
+    
+    // Get SVG elements
+    const svgElements = {
+      vinSourceValue: document.getElementById('vin-source-value'),
+      voutSourceValue: document.getElementById('vout-source-value'),
+      riValueSvg: document.getElementById('ri-value-svg'),
+      rfValueSvg: document.getElementById('rf-value-svg'),
+      rlValueSvg: document.getElementById('rl-value-svg'),
+      
+      circuitGainValue: document.getElementById('circuit-gain-value'),
+      currentValue: document.getElementById('current-value')
+    };
+    
+    // Set up event listeners
+    elements.vinSlider.addEventListener('input', updateValues);
+    elements.riSlider.addEventListener('input', updateValues);
+    elements.rfSlider.addEventListener('input', updateValues);
+    elements.rlSlider.addEventListener('input', updateValues);
+    elements.clearDataBtn.addEventListener('click', clearData);
+    elements.addReadingBtn.addEventListener('click', addReading);
+    elements.downloadBtn.addEventListener('click', downloadResults);
+    
+    // Set up Transfer Characteristics Chart
+    const transferChartCtx = document.getElementById('transferChart').getContext('2d');
+    const transferChart = new Chart(transferChartCtx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Vout vs Vin',
+            borderColor: '#5a2ca0',
+            backgroundColor: 'rgba(90, 44, 160, 0)',
+            borderWidth: 2.5,
+            pointRadius: 0,
+            tension: 0.2,
+            data: [] // Start with no data in the curve
+          },
+          {
+            label: 'Recorded Readings',
+            borderColor: '#8e44ad',
+            backgroundColor: 'rgba(142, 68, 173, 0.1)',
+            borderWidth: 0,
+            pointRadius: 5,
+            pointBackgroundColor: '#8e44ad',
+            data: []
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 300
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            title: {
+              display: true,
+              text: 'Input Voltage (V)'
+            },
+            min: -10,
+            max: 10,
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              color: 'rgba(226, 232, 240, 0.3)',
+              lineWidth: 0.5
+            },
+            ticks: {
+              stepSize: 2
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Output Voltage (V)'
+            },
+            min: -15,
+            max: 15,
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              color: 'rgba(226, 232, 240, 0.3)',
+              lineWidth: 0.5
+            },
+            ticks: {
+              stepSize: 5
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                const point = context.raw;
+                if (context.datasetIndex === 1) { // Current readings dataset
+                  return [
+                    `Vin: ${point.x.toFixed(2)}V`,
+                    `Vout: ${point.y.toFixed(2)}V`,
+                    `Current: ${point.current?.toFixed(2) || 'N/A'}mA`,
+                    `Gain: ${point.gain?.toFixed(2) || 'N/A'}`
+                  ];
+                }
+                return `Vout: ${point.y.toFixed(2)}V`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Generate the transfer curve points
+    function generateTransferCurve() {
+      const points = [];
+      const stepSize = 0.5;
+      const ri = parseFloat(elements.riSlider.value) * 1000; // Convert to ohms
+      const rf = parseFloat(elements.rfSlider.value) * 1000; // Convert to ohms
+      
+      // Calculate the gain
+      const gain = -rf / ri;
+      
+      // Generate the characteristic curve
+      for (let vin = -10; vin <= 10; vin += stepSize) {
+        let vout = gain * vin;
+        
+        // Simulate op-amp saturation at +/-15V
+        vout = Math.max(-15, Math.min(15, vout));
+        
+        // Add point to array
+        points.push({x: vin, y: vout});
+      }
+      
+      return points;
+    }
+    
+    // Calculate amplifier values
+    function calculateAmplifierValues() {
+      const vin = parseFloat(elements.vinSlider.value);
+      const ri = parseFloat(elements.riSlider.value) * 1000; // Convert to ohms
+      const rf = parseFloat(elements.rfSlider.value) * 1000; // Convert to ohms
+      const rl = parseFloat(elements.rlSlider.value) * 1000; // Convert to ohms
+      
+      // Calculate the gain (negative for inverting amplifier)
+      const gain = -rf / ri;
+      
+      // Calculate output voltage
+      let vout = gain * vin;
+      
+      // Simulate op-amp saturation at +/-15V
+      vout = Math.max(-15, Math.min(15, vout));
+      
+      // Calculate the current through Ri
+      const current = (vin - 0) / ri * 1000; // Convert to mA
+      
+      return {
+        vout: vout,
+        gain: gain,
+        current: Math.abs(current) // Absolute value for display
+      };
+    }
+    
+    // Update all values based on slider positions
+    function updateValues() {
+      // Update display values
+      elements.vinValue.textContent = elements.vinSlider.value;
+      elements.riValue.textContent = elements.riSlider.value;
+      elements.rfValue.textContent = elements.rfSlider.value;
+      elements.rlValue.textContent = elements.rlSlider.value;
+      
+      // Update SVG display values
+      svgElements.vinSourceValue.textContent = elements.vinSlider.value + 'V';
+      svgElements.riValueSvg.textContent = elements.riSlider.value + 'kΩ';
+      svgElements.rfValueSvg.textContent = elements.rfSlider.value + 'kΩ';
+      svgElements.rlValueSvg.textContent = elements.rlSlider.value + 'kΩ';
+      
+      // Calculate amplifier values
+      const ampValues = calculateAmplifierValues();
+      
+      // Update the output values
+      svgElements.voutSourceValue.textContent = ampValues.vout.toFixed(2) + 'V';
+      svgElements.circuitGainValue.textContent = ampValues.gain.toFixed(1);
+      svgElements.currentValue.textContent = ampValues.current.toFixed(2) + 'mA';
+      
+      // We don't update the curve automatically here anymore
+      
+      // Update the chart (but not the curve data)
+      transferChart.update();
+      
+      // Adjust visual elements based on current values
+      updateVisualElements(ampValues);
+    }
+    
+    // Update visual elements of the circuit
+    function updateVisualElements(ampValues) {
+      // Adjust op-amp appearance based on operating conditions
+      const opamp = document.querySelector('#opamp path');
+      if (opamp) {
+        // Change color based on saturation
+        if (Math.abs(ampValues.vout) >= 15) {
+          // Saturated
+          opamp.setAttribute('fill', 'rgba(239, 68, 68, 0.2)'); // Red tint for saturation
+        } else {
+          // Normal operation
+          opamp.setAttribute('fill', 'white');
+        }
+      }
+      
+      // Adjust current indicators thickness and animation
+      const currentPaths = document.querySelectorAll('#current-flow polyline');
+      if (currentPaths.length > 0) {
+        const current = ampValues.current;
+        const basethickness = 2;
+        const maxThickness = 6;
+        const newThickness = Math.min(basethickness + current / 2, maxThickness);
+        
+        // Change current color based on magnitude
+        let currentColor = '#2563eb'; // Default blue
+        
+        if (Math.abs(ampValues.vout) >= 15) {
+          currentColor = '#ef4444'; // Red for saturation
+        } else if (current < 0.05) {
+          currentColor = '#6b7280'; // Gray for very low current
+        }
+        
+        // Apply to all current indicators
+        currentPaths.forEach(path => {
+          path.setAttribute('stroke-width', newThickness);
+          path.setAttribute('stroke', currentColor);
+          
+          // Add flowing animation for current
+          if (current > 0.05 && !path.hasAttribute('data-animated')) {
+            path.setAttribute('data-animated', 'true');
+            path.setAttribute('stroke-dasharray', '1,12');
+            
+            const flowAnimate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            flowAnimate.setAttribute('attributeName', 'stroke-dasharray');
+            flowAnimate.setAttribute('values', '1,12;12,1;1,12');
+            flowAnimate.setAttribute('dur', (2 / Math.max(0.1, current)) + 's'); // Faster animation for higher current
+            flowAnimate.setAttribute('repeatCount', 'indefinite');
+            path.appendChild(flowAnimate);
+          } else if (current <= 0.05) {
+            // Remove animation for very low current
+            path.removeAttribute('data-animated');
+            path.setAttribute('stroke-dasharray', '');
+            const animate = path.querySelector('animate');
+            if (animate) path.removeChild(animate);
+          }
+        });
+        
+        // Update arrowhead color to match current
+        const arrowhead = document.querySelector('#arrowhead polygon');
+        if (arrowhead) {
+          arrowhead.setAttribute('fill', currentColor);
+        }
+      }
+    }
+    
+    // Add current reading to the chart and table
+    function addReading() {
+      const vin = parseFloat(elements.vinSlider.value);
+      const ampValues = calculateAmplifierValues();
+      
+      // Add to the chart as a point in dataset 1 (readings)
+      transferChart.data.datasets[1].data.push({
+        x: vin,
+        y: ampValues.vout,
+        current: ampValues.current,
+        gain: ampValues.gain
+      });
+      
+      // Also add to dataset 0 (curve) to show the line connecting readings
+      // This matches the BJT simulator behavior
+      transferChart.data.datasets[0].data.push({
+        x: vin,
+        y: ampValues.vout
+      });
+      
+      // Sort data points by x value in both datasets
+      transferChart.data.datasets[0].data.sort((a, b) => a.x - b.x);
+      transferChart.data.datasets[1].data.sort((a, b) => a.x - b.x);
+      
+      // Update chart
+      transferChart.update();
+      
+      // Add row to the table
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>${vin.toFixed(2)}</td>
+        <td>${ampValues.vout.toFixed(2)}</td>
+        <td>${ampValues.current.toFixed(2)}</td>
+        <td>${ampValues.gain.toFixed(1)}</td>
+      `;
+      elements.observationTableBody.appendChild(newRow);
+      
+      // Visual feedback
+      const chartContainer = document.querySelector('.chart-container');
+      chartContainer.style.transition = 'background-color 0.3s';
+      chartContainer.style.backgroundColor = 'rgba(37, 99, 235, 0.1)';
+      setTimeout(() => {
+        chartContainer.style.backgroundColor = 'transparent';
+      }, 300);
+    }
+    
+    // Clear all readings
+    function clearData() {
+      // Clear both datasets
+      transferChart.data.datasets[0].data = [];
+      transferChart.data.datasets[1].data = [];
+      transferChart.update();
+      elements.observationTableBody.innerHTML = '';
+    }
+    
+    // Check if we came from a specific activity
+    function getURLParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Set initial state based on activity source
+    function initializeFromActivity() {
+      const activitySource = getURLParameter('activity');
+      
+      // Reset values to defaults
+      elements.vinSlider.value = 2.0;
+      elements.riSlider.value = 10;
+      elements.rfSlider.value = 100;
+      elements.rlSlider.value = 10;
+      
+      // Force graph update immediately
+      updateValues();
+      
+      // Clear any existing data points
+      clearData();
+      
+      if (activitySource === 'completed') {
+        // Add multiple readings to show a complete experiment
+        addReading(); // Initial value
+        
+        // Create a sweep across the input range
+        for (let vin = -8; vin <= 8; vin += 2) {
+          elements.vinSlider.value = vin;
+          updateValues();
+          addReading();
+        }
+        
+      } else if (activitySource === 'in-progress') {
+        // Add some readings to show partial completion
+        addReading(); // Initial value
+        
+        // Create a partial sweep
+        for (let vin = -4; vin <= 4; vin += 2) {
+          elements.vinSlider.value = vin;
+          updateValues();
+          addReading();
+        }
+      }
+    }
+    
+    // Call initialization from activity if applicable
+    initializeFromActivity();
+    
+    // Make sure values are updated on initial load
+    updateValues();
+    
+    // Start with a single point for the initial condition
+    // This makes it match how the BJT simulator works
+    addReading();
+
+    // Add to inverting amplifier script
+    document.addEventListener('DOMContentLoaded', function() {
+      // Ensure table is empty on page load
+      if (elements.observationTableBody) {
+        elements.observationTableBody.innerHTML = '';
+      }
+    });
+
+    // Add download functionality
+    function downloadResults() {
+      // Create PDF document with jsPDF
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Add title to the PDF
+      doc.setFontSize(18);
+      doc.text("Inverting Amplifier Simulation Results", 14, 20);
+      
+      // Add timestamp
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+      doc.setFontSize(10);
+      doc.text(`Generated: ${timestamp}`, 14, 30);
+
+      // Add circuit parameters
+      doc.setFontSize(12);
+      doc.text("Circuit Parameters:", 14, 40);
+      doc.setFontSize(10);
+      doc.text(`Input Voltage (VIN): ${elements.vinValue.textContent} V`, 14, 48);
+      doc.text(`Input Resistor (Ri): ${elements.riValue.textContent} kΩ`, 14, 54);
+      doc.text(`Feedback Resistor (Rf): ${elements.rfValue.textContent} kΩ`, 14, 60);
+      doc.text(`Load Resistor (RL): ${elements.rlValue.textContent} kΩ`, 14, 66);
+      doc.text(`Calculated Gain: ${svgElements.circuitGainValue.textContent}`, 14, 72);
+      
+      // Add the observations table
+      doc.text("Observation Data:", 14, 82);
+      
+      // Create array for autoTable
+      const tableRows = [];
+      const tableColumns = [
+        { header: 'VIN (V)', dataKey: 'vin' },
+        { header: 'VOUT (V)', dataKey: 'vout' },
+        { header: 'Current (mA)', dataKey: 'current' },
+        { header: 'Gain', dataKey: 'gain' }
+      ];
+      
+      // Get data from table
+      const rows = elements.observationTableBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        tableRows.push({
+          vin: cells[0].textContent,
+          vout: cells[1].textContent,
+          current: cells[2].textContent,
+          gain: cells[3].textContent
+        });
+      });
+      
+      // Add table to PDF
+      doc.autoTable({
+        head: [tableColumns.map(col => col.header)],
+        body: tableRows.map(row => [row.vin, row.vout, row.current, row.gain]),
+        startY: 85,
+        theme: 'grid',
+        styles: { fontSize: 8 }
+      });
+      
+      // Calculate position for graph (after table)
+      const finalY = doc.lastAutoTable.finalY || 120;
+      
+      // Add chart as image
+      doc.text("Voltage Transfer Characteristic:", 14, finalY + 10);
+      
+      // Convert chart to image
+      const canvas = document.getElementById('transferChart');
+      const chartImage = canvas.toDataURL('image/png', 1.0);
+      doc.addImage(chartImage, 'PNG', 14, finalY + 15, 180, 80);
+      
+      // Save the PDF
+      doc.save('inverting_amplifier_results.pdf');
+      
+      // Show success message to user
+      showNotification('Results successfully downloaded as PDF', 'success');
+    }
+    
+    // Add notification function
+    function showNotification(message, type) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      // Apply styles
+      notification.style.position = 'fixed';
+      notification.style.top = '20px';
+      notification.style.right = '20px';
+      notification.style.padding = '10px 20px';
+      notification.style.borderRadius = '5px';
+      notification.style.fontSize = '14px';
+      notification.style.zIndex = '1000';
+      notification.style.transition = 'opacity 0.3s';
+      
+      // Apply color based on type
+      if (type === 'success') {
+        notification.style.backgroundColor = '#5a2ca0';  // Royal purple
+        notification.style.color = 'white';
+      } else {
+        notification.style.backgroundColor = '#e74c3c';  // Red
+        notification.style.color = 'white';
+      }
+      
+      // Add to document
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

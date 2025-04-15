@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BJT Amplifier Simulator - Electronic Circuit Simulation Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <script src="home.js" defer></script>
+  <script src="back-to-top.js" defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    .simulator-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 0 20px;
+    }
+    @media (min-width: 992px) {
+      .simulator-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .circuit-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .control-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slider-group {
+      margin-bottom: 20px;
+    }
+    .slider-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #1e293b;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+      accent-color: #5a2ca0; /* Royal purple for sliders */
+    }
+    .value-display {
+      color: #475569;
+      font-size: 0.9em;
+    }
+    .chart-container {
+      margin-top: 20px;
+      height: 300px;
+    }
+    .observation-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .observation-table th, .observation-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      text-align: center;
+    }
+    .observation-table th {
+      background-color: #f8f5ff; /* Very light purple */
+      color: #1e293b;
+    }
+    .circuit-diagram {
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    .circuit-diagram svg {
+      width: 100%;
+      height: auto;
+      max-height: 500px;
+    }
+    .clear-button-container {
+      margin: 15px 0;
+      text-align: center;
+    }
+    .clear-button {
+      background-color: #e74c3c; /* Red from theme */
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .clear-button:hover {
+      background-color: #c0392b; /* Darker red */
+    }
+    
+    /* Simulation Mode Styles */
+    body.simulation-mode .avatar-toggle {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    body.simulation-mode .main-nav ul li:not(:first-child) {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a::before {
+      content: "←";
+      margin-right: 5px;
+      font-size: 1.2em;
+    }
+    
+    body.simulation-mode .header-content {
+      padding: 0.5rem 1rem;
+    }
+    
+    body.simulation-mode .site-title {
+      font-size: 1.3rem;
+    }
+    
+    body.simulation-mode .college-name {
+      font-size: 0.75rem;
+    }
+    
+    /* Instructions Section Styles */
+    .instructions-section {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f8f5ff; /* Very light purple */
+      border-radius: 10px;
+      border-left: 4px solid #5a2ca0; /* Royal purple */
+    }
+    
+    .instructions-section h3 {
+      color: #1e293b;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    
+    .instruction-card {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    .instruction-step {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+    
+    .step-number {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 30px;
+      height: 30px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-content h4 {
+      color: #5a2ca0; /* Royal purple */
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+    }
+    
+    .step-content p {
+      margin: 0 0 10px 0;
+      line-height: 1.5;
+    }
+
+    /* Add back button styling */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 50%;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+      transition: background-color 0.2s;
+    }
+
+    .back-button:hover {
+      background-color: #4a2483; /* Darker purple */
+    }
+
+    /* Active tab style */
+    .main-nav ul li a.active {
+      color: #5a2ca0; /* Royal purple */
+      font-weight: bold;
+      border-bottom: 2px solid #5a2ca0;
+    }
+
+    .main-header {
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Dark Mode Styles */
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --section-bg: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --border-color: #334155;
+    }
+
+    [data-theme="dark"] body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .circuit-section,
+    [data-theme="dark"] .control-section {
+      background: var(--section-bg);
+      border: 1px solid var(--border-color);
+    }
+
+    [data-theme="dark"] .slider-group label,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4 {
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .value-display {
+      color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .observation-table th {
+      background-color: rgba(90, 44, 160, 0.2);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .observation-table td {
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .instructions-section {
+      background-color: rgba(90, 44, 160, 0.1);
+      border-left: 4px solid #9061c2;
+    }
+
+    [data-theme="dark"] .step-content p,
+    [data-theme="dark"] .step-content ul,
+    [data-theme="dark"] .step-content ol,
+    [data-theme="dark"] .step-content li {
+      color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .step-number {
+      background-color: #9061c2;
+    }
+
+    [data-theme="dark"] .step-content h4 {
+      color: #a55eea;
+    }
+
+    [data-theme="dark"] .main-header {
+      background-color: #9061c2;
+    }
+
+    [data-theme="dark"] rect[fill="#f8f5ff"] {
+      fill: #1e293b;
+    }
+
+    [data-theme="dark"] text[fill="#1e293b"] {
+      fill: var(--text-primary);
+    }
+
+    [data-theme="dark"] rect[fill="white"] {
+      fill: #2d3748;
+    }
+    
+    [data-theme="dark"] line[stroke="#1e293b"] {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] #wires line {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] text[fill="#475569"] {
+      fill: #cbd5e1;
+    }
+
+    [data-theme="dark"] path[stroke="#1e293b"] {
+      stroke: #94a3b8;
+    }
+  </style>
+  <script>
+    // This script sets up theme syncing with the main site
+    function syncTheme() {
+      const storedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', storedTheme);
+    }
+    
+    // Apply theme on page load
+    syncTheme();
+    
+    // Listen for changes to theme in localStorage (from main site)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'theme') {
+        syncTheme();
+      }
+    });
+  </script>
+</head>
+<body class="simulation-mode" id="simulator-body">
+  <!-- Profile Sidebar -->
+  <div class="profile-sidebar" id="profileSidebar">
+    <div class="profile-content">
+      <button class="close-sidebar" id="closeSidebar">&times;</button>
+      <div class="sidebar-avatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+      <div class="profile-header">
+        <div class="profile-info">
+          <h2>Shubham Patel</h2>
+          <div class="user-level">ADVANCED LEVEL</div>
+          <p class="user-title">Electronics and Computer Science Engineering Student</p>
+          <div class="progress-container">
+            <span>Progress to next level:</span>
+            <span>75%</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-stats">
+        <div class="stat-card">
+          <span class="stat-value">12</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">3</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">5</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page Overlay -->
+  <div class="page-overlay" id="pageOverlay"></div>
+  
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-content">
+      <!-- NEW DEDICATED BACK BUTTON -->
+      <a href="index.html" class="back-button">&lt;</a>
+      
+      <div class="logo-container">
+        <h1 class="site-title">Electronic Circuit Simulation Lab</h1>
+        <p class="college-name">Shree L.R Tiwari College Of Engineering</p>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li style="display:none;"><a href="index.html">Home</a></li>
+          <li><a href="mosfet_simulator.html">MOSFET Simulator</a></li>
+          <li><a href="bjt_amplifier.html" class="active">BJT Amplifier</a></li>
+          <li><a href="inverting_amplifier.html">Inverting Amplifier</a></li>
+          <li><a href="#">Logic Gates</a></li>
+        </ul>
+      </nav>
+      <!-- Avatar Toggle Button -->
+      <div class="avatar-toggle" id="profileAvatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="simulator-container">
+    <div class="circuit-section">
+      <h2>Circuit Diagram</h2>
+      <div class="circuit-diagram">
+        <!-- SVG content for BJT common emitter amplifier circuit -->
+        <svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Circuit Background with clean look -->
+          <rect x="0" y="0" width="800" height="500" fill="#f8fafc" rx="10" ry="10" />
+          
+          <!-- Very subtle grid for alignment -->
+          <g stroke="#e2e8f0" stroke-width="0.5" stroke-opacity="0.5">
+            <g id="vertical-lines">
+              <line x1="100" y1="50" x2="100" y2="450" />
+              <line x1="200" y1="50" x2="200" y2="450" />
+              <line x1="300" y1="50" x2="300" y2="450" />
+              <line x1="400" y1="50" x2="400" y2="450" />
+              <line x1="500" y1="50" x2="500" y2="450" />
+              <line x1="600" y1="50" x2="600" y2="450" />
+              <line x1="700" y1="50" x2="700" y2="450" />
+            </g>
+            <g id="horizontal-lines">
+              <line x1="50" y1="100" x2="750" y2="100" />
+              <line x1="50" y1="200" x2="750" y2="200" />
+              <line x1="50" y1="300" x2="750" y2="300" />
+              <line x1="50" y1="400" x2="750" y2="400" />
+            </g>
+          </g>
+          
+          <!-- BJT Parameters Box -->
+          <g id="parameters-box">
+            <rect x="500" y="50" width="250" height="100" fill="white" stroke="#2563eb" stroke-width="1" rx="5" ry="5" />
+            <text x="510" y="75" font-family="Arial" font-size="16" font-weight="bold" fill="#1e293b">BJT Parameters:</text>
+            <text x="510" y="100" font-family="Arial" font-size="14" fill="#1e293b">Current Gain (β): <tspan id="beta-param-value" fill="#1e293b">100</tspan></text>
+            <text x="510" y="120" font-family="Arial" font-size="14" fill="#1e293b">Early Voltage (V<tspan font-size="10" baseline-shift="sub">A</tspan>): <tspan id="va-param-value" fill="#1e293b">80V</tspan></text>
+            <text x="510" y="140" font-family="Arial" font-size="14" fill="#1e293b">Base-Emitter V<tspan font-size="10" baseline-shift="sub">BE</tspan>: <tspan id="vbe-param-value" fill="#1e293b">0.7V</tspan></text>
+          </g>
+          
+          <!-- Modern BJT Symbol -->
+          <g id="bjt" transform="translate(250,250)">
+            <!-- Base line -->
+            <line x1="-40" y1="0" x2="-10" y2="0" stroke="#2563eb" stroke-width="2" />
+            
+            <!-- Collector line -->
+            <line x1="0" y1="-40" x2="0" y2="-10" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Emitter line -->
+            <line x1="0" y1="10" x2="0" y2="40" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- BJT body -->
+            <line x1="-10" y1="-20" x2="-10" y2="20" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="-20" x2="0" y2="-10" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="20" x2="0" y2="10" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Arrow for NPN -->
+            <path d="M-3,7 L0,10 L3,4" fill="none" stroke="#2563eb" stroke-width="1.5" />
+            
+            <!-- Labels -->
+            <text x="8" y="-15" font-family="Arial" font-size="14" text-anchor="start" fill="#1e293b">C</text>
+            <text x="-25" y="-5" font-family="Arial" font-size="14" text-anchor="middle" fill="#2563eb">B</text>
+            <text x="8" y="20" font-family="Arial" font-size="14" text-anchor="start" fill="#1e293b">E</text>
+          </g>
+          
+          <!-- VCC Supply -->
+          <g transform="translate(250,100)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#2563eb" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#2563eb">VCC</text>
+            <text id="vcc-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">12.0V</text>
+          </g>
+          
+          <!-- Collector Resistor RC -->
+          <g id="collector-resistor" transform="translate(250,150)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L0,10 L-5,15 L5,25 L-5,35 L5,45 L-5,55 L5,65 L0,70 L0,80" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rc-path" />
+            <!-- Label -->
+            <text x="15" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RC</text>
+            <text id="rc-value-svg" x="15" y="60" font-family="Arial" font-size="12" fill="#475569">1kΩ</text>
+          </g>
+          
+          <!-- Base Resistor RB -->
+          <g id="base-resistor" transform="translate(150,250)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L10,0 L15,-5 L25,5 L35,-5 L45,5 L55,-5 L65,5 L70,0 L80,0" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rb-path" />
+            <!-- Label -->
+            <text x="35" y="-10" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RB</text>
+            <text id="rb-value-svg" x="35" y="-25" font-family="Arial" font-size="12" fill="#475569">10kΩ</text>
+          </g>
+          
+          <!-- Emitter Resistor RE -->
+          <g id="emitter-resistor" transform="translate(250,300)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L0,10 L-5,15 L5,25 L-5,35 L5,45 L-5,55 L5,65 L0,70 L0,80" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="re-path" />
+            <!-- Label -->
+            <text x="15" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RE</text>
+            <text id="re-value-svg" x="15" y="60" font-family="Arial" font-size="12" fill="#475569">220Ω</text>
+          </g>
+          
+          <!-- VIN Source -->
+          <g transform="translate(100,250)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#2563eb" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#2563eb">VIN</text>
+            <text id="vin-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">2.0V</text>
+          </g>
+          
+          <!-- Output Capacitor -->
+          <g id="output-capacitor" transform="translate(350,250)">
+            <line x1="0" y1="-20" x2="0" y2="-10" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="-10" x2="10" y2="-10" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="0" x2="10" y2="0" stroke="#1e293b" stroke-width="2" />
+            <line x1="0" y1="0" x2="0" y2="20" stroke="#1e293b" stroke-width="2" />
+            <text x="20" y="-5" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">Cout</text>
+            <text x="20" y="15" font-family="Arial" font-size="12" fill="#475569">10μF</text>
+          </g>
+          
+          <!-- Ground Symbols -->
+          <g id="ground" transform="translate(250,400)">
+            <line x1="0" y1="-20" x2="0" y2="0" stroke="#1e293b" stroke-width="2" />
+            <line x1="-15" y1="0" x2="15" y2="0" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="5" x2="10" y2="5" stroke="#1e293b" stroke-width="2" />
+            <line x1="-5" y1="10" x2="5" y2="10" stroke="#1e293b" stroke-width="2" />
+          </g>
+          
+          <!-- Output Load Resistor RL -->
+          <g id="load-resistor" transform="translate(400,300)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L0,10 L-5,15 L5,25 L-5,35 L5,45 L-5,55 L5,65 L0,70 L0,80" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rl-path" />
+            <!-- Label -->
+            <text x="15" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RL</text>
+            <text id="rl-value-svg" x="15" y="60" font-family="Arial" font-size="12" fill="#475569">10kΩ</text>
+          </g>
+          
+          <!-- Output Voltage -->
+          <g transform="translate(450,250)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#2563eb" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#2563eb">VOUT</text>
+            <text id="vout-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">0.0V</text>
+          </g>
+          
+          <!-- Connecting Wires -->
+          <g id="wires" stroke="#1e293b" stroke-width="2">
+            <!-- VCC to RC -->
+            <line x1="250" y1="125" x2="250" y2="150" />
+            
+            <!-- RC to BJT Collector -->
+            <line x1="250" y1="230" x2="250" y2="210" />
+            
+            <!-- BJT Collector to Output Cap -->
+            <line x1="250" y1="210" x2="350" y2="210" />
+            <line x1="350" y1="210" x2="350" y2="230" />
+            
+            <!-- VIN to RB -->
+            <line x1="125" y1="250" x2="150" y2="250" />
+            
+            <!-- RB to BJT Base -->
+            <line x1="230" y1="250" x2="210" y2="250" />
+            
+            <!-- BJT Emitter to RE -->
+            <line x1="250" y1="290" x2="250" y2="300" />
+            
+            <!-- RE to Ground -->
+            <line x1="250" y1="380" x2="250" y2="380" />
+            
+            <!-- Output Cap to RL and VOUT -->
+            <line x1="350" y1="270" x2="350" y2="300" />
+            <line x1="350" y1="270" x2="400" y2="270" />
+            <line x1="400" y1="270" x2="400" y2="300" />
+            <line x1="400" y1="270" x2="425" y2="250" />
+            
+            <!-- RL to Ground -->
+            <line x1="400" y1="380" x2="400" y2="400" />
+            <line x1="400" y1="400" x2="250" y2="400" />
+          </g>
+          
+          <!-- Current Flow Indicators -->
+          <g id="current-flow" stroke="#ef4444" stroke-width="2" fill="none">
+            <polyline points="250,180 250,195" marker-end="url(#arrowhead)" />
+            <polyline points="250,330 250,350" marker-end="url(#arrowhead)" />
+            <polyline points="370,250 390,250" marker-end="url(#arrowhead)" />
+          </g>
+          
+          <!-- Operating Point Info -->
+          <g id="operating-point">
+            <rect x="50" y="380" width="220" height="90" fill="white" stroke="#2563eb" stroke-width="1" rx="5" ry="5" />
+            <text x="60" y="400" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">Operating Point:</text>
+            <text x="60" y="425" font-family="Arial" font-size="14" fill="#1e293b">Collector Current (I<tspan font-size="10" baseline-shift="sub">C</tspan>): <tspan id="ic-value" fill="#ef4444">0.00mA</tspan></text>
+            <text x="60" y="445" font-family="Arial" font-size="14" fill="#1e293b">Base Current (I<tspan font-size="10" baseline-shift="sub">B</tspan>): <tspan id="ib-value" fill="#ef4444">0.00μA</tspan></text>
+            <text x="60" y="465" font-family="Arial" font-size="14" fill="#1e293b">Voltage Gain (A<tspan font-size="10" baseline-shift="sub">v</tspan>): <tspan id="gain-value" fill="#ef4444">0.0</tspan></text>
+          </g>
+          
+          <!-- Title -->
+          <text x="400" y="30" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#1e293b">BJT Common Emitter Amplifier</text>
+          
+          <!-- Arrowhead Definition -->
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      
+      <!-- Instructions Section -->
+      <div class="instructions-section">
+        <h3>Experiment Instructions</h3>
+        <div class="instruction-card">
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              <h4>Understanding the Circuit</h4>
+              <p>The circuit above shows a common emitter BJT amplifier. The key components include:</p>
+              <ul>
+                <li>BJT: The main active device with base (B), collector (C), and emitter (E) terminals</li>
+                <li>VIN: Input voltage that drives the base through RB</li>
+                <li>VCC: Collector supply voltage that powers the circuit</li>
+                <li>RC: Collector resistor that converts collector current into voltage change</li>
+                <li>RB: Base resistor that limits and controls base current</li>
+                <li>RE: Emitter resistor that provides negative feedback and improves stability</li>
+                <li>RL: Load resistor representing the input impedance of the next stage</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              <h4>Experiment Objectives</h4>
+              <p>In this experiment, you will:</p>
+              <ul>
+                <li>Identify the different operating regions of a BJT (Cut-off, Active, and Saturation)</li>
+                <li>Observe how changing VIN affects the collector current (IC) and output voltage</li>
+                <li>Study the effect of current gain (β) on amplifier performance</li>
+                <li>Analyze the voltage gain of the amplifier under different load conditions</li>
+                <li>Understand the impact of biasing components (RB, RC, RE) on circuit operation</li>
+                <li>Observe the key parameters that determine small-signal performance</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              <h4>Performing the Experiment</h4>
+              <ol>
+                <li>Start by setting VIN to around 2.0V to establish a proper bias point in the active region</li>
+                <li>Observe the collector current, base current, and output voltage readings</li>
+                <li>Click "Add Reading" to record data points for the transfer characteristic curve</li>
+                <li>To generate a complete transfer curve, vary VIN from 0.5V to 4.5V in steps of 0.5V</li>
+                <li>For circuit optimization, try different values of RC (0.5kΩ to 5kΩ) and observe the voltage gain</li>
+                <li>Study the effect of emitter degeneration by changing RE from 100Ω to 500Ω</li>
+                <li>Observe how the current gain (β) affects the circuit's performance and input impedance</li>
+                <li>Identify the points where the transistor enters saturation or cut-off regions</li>
+              </ol>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">4</span>
+            <div class="step-content">
+              <h4>Analysis Tips</h4>
+              <ul>
+                <li>In the <strong>Cut-off region</strong> (VIN < 0.7V): Base-emitter junction is not conducting, and collector current is approximately zero</li>
+                <li>In the <strong>Active region</strong> (VIN sufficient for proper biasing): Transistor acts as an amplifier with IC = β×IB</li>
+                <li>In the <strong>Saturation region</strong> (VIN too high): Collector-emitter voltage falls to about 0.2V, and the amplifier clips</li>
+                <li>The <strong>voltage gain</strong> in the active region is approximately -RC/(re + RE), where re ≈ 25mV/IE</li>
+                <li>The <strong>input impedance</strong> seen at the base is approximately RB || (β×(re + RE))</li>
+                <li>Increasing RE improves stability and linearity but reduces gain (negative feedback)</li>
+                <li>A higher value of β increases input impedance and current gain but may lead to more temperature sensitivity</li>
+                <li>The transfer curve should show a linear region (active mode) with saturation at higher input voltages</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <h2>Controls</h2>
+      
+      <!-- Circuit Parameters -->
+      <div class="slider-group">
+        <label for="vcc-slider">Supply Voltage (V<sub>CC</sub>):</label>
+        <input type="range" id="vcc-slider" min="5" max="20" step="0.5" value="12">
+        <div class="value-display">V<sub>CC</sub> = <span id="vcc-value">12.0</span> V</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="vin-slider">Input Voltage (V<sub>IN</sub>):</label>
+        <input type="range" id="vin-slider" min="0" max="5" step="0.1" value="2">
+        <div class="value-display">V<sub>IN</sub> = <span id="vin-value">2.0</span> V</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="rc-slider">Collector Resistor (R<sub>C</sub>):</label>
+        <input type="range" id="rc-slider" min="0.1" max="10" step="0.1" value="1">
+        <div class="value-display">R<sub>C</sub> = <span id="rc-value">1.0</span> kΩ</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="rb-slider">Base Resistor (R<sub>B</sub>):</label>
+        <input type="range" id="rb-slider" min="1" max="100" step="1" value="10">
+        <div class="value-display">R<sub>B</sub> = <span id="rb-value">10</span> kΩ</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="re-slider">Emitter Resistor (R<sub>E</sub>):</label>
+        <input type="range" id="re-slider" min="10" max="1000" step="10" value="220">
+        <div class="value-display">R<sub>E</sub> = <span id="re-value">220</span> Ω</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="rl-slider">Load Resistor (R<sub>L</sub>):</label>
+        <input type="range" id="rl-slider" min="1" max="50" step="1" value="10">
+        <div class="value-display">R<sub>L</sub> = <span id="rl-value">10</span> kΩ</div>
+      </div>
+      
+      <div class="slider-group">
+        <label for="beta-slider">Current Gain (β):</label>
+        <input type="range" id="beta-slider" min="50" max="300" step="5" value="100">
+        <div class="value-display">β = <span id="beta-value">100</span></div>
+      </div>
+      
+      <!-- Chart for Voltage Transfer Characteristics -->
+      <h3>Voltage Transfer Characteristics</h3>
+      <div class="clear-button-container">
+        <button id="clearDataBtn" class="clear-button">Clear Data</button>
+        <button id="addReadingBtn" class="clear-button" style="background-color: #5a2ca0; margin-left: 10px;">Add Reading</button>
+        <button id="downloadBtn" class="clear-button" style="background-color: #f39c12; margin-left: 10px;">Download Results</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="transferChart"></canvas>
+      </div>
+      
+      <!-- Observation Table -->
+      <h3>Observations</h3>
+      <div class="table-container">
+        <table class="observation-table">
+          <thead>
+            <tr>
+              <th>V<sub>IN</sub> (V)</th>
+              <th>V<sub>OUT</sub> (V)</th>
+              <th>I<sub>C</sub> (mA)</th>
+              <th>I<sub>B</sub> (μA)</th>
+              <th>Gain</th>
+            </tr>
+          </thead>
+          <tbody id="observationTableBody">
+            <!-- Data will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Get UI elements
+    const elements = {
+      vccSlider: document.getElementById('vcc-slider'),
+      vinSlider: document.getElementById('vin-slider'),
+      rcSlider: document.getElementById('rc-slider'),
+      rbSlider: document.getElementById('rb-slider'),
+      reSlider: document.getElementById('re-slider'),
+      rlSlider: document.getElementById('rl-slider'),
+      betaSlider: document.getElementById('beta-slider'),
+      
+      vccValue: document.getElementById('vcc-value'),
+      vinValue: document.getElementById('vin-value'),
+      rcValue: document.getElementById('rc-value'),
+      rbValue: document.getElementById('rb-value'),
+      reValue: document.getElementById('re-value'),
+      rlValue: document.getElementById('rl-value'),
+      betaValue: document.getElementById('beta-value'),
+      
+      clearDataBtn: document.getElementById('clearDataBtn'),
+      addReadingBtn: document.getElementById('addReadingBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      observationTableBody: document.getElementById('observationTableBody')
+    };
+    
+    // Get SVG elements
+    const svgElements = {
+      vccSourceValue: document.getElementById('vcc-source-value'),
+      vinSourceValue: document.getElementById('vin-source-value'),
+      rcValueSvg: document.getElementById('rc-value-svg'),
+      rbValueSvg: document.getElementById('rb-value-svg'),
+      reValueSvg: document.getElementById('re-value-svg'),
+      rlValueSvg: document.getElementById('rl-value-svg'),
+      voutSourceValue: document.getElementById('vout-source-value'),
+      
+      icValue: document.getElementById('ic-value'),
+      ibValue: document.getElementById('ib-value'),
+      gainValue: document.getElementById('gain-value'),
+      
+      betaParamValue: document.getElementById('beta-param-value'),
+      vaParamValue: document.getElementById('va-param-value'),
+      vbeParamValue: document.getElementById('vbe-param-value')
+    };
+    
+    // Set up event listeners
+    elements.vccSlider.addEventListener('input', updateValues);
+    elements.vinSlider.addEventListener('input', updateValues);
+    elements.rcSlider.addEventListener('input', updateValues);
+    elements.rbSlider.addEventListener('input', updateValues);
+    elements.reSlider.addEventListener('input', updateValues);
+    elements.rlSlider.addEventListener('input', updateValues);
+    elements.betaSlider.addEventListener('input', updateValues);
+    elements.clearDataBtn.addEventListener('click', clearData);
+    elements.addReadingBtn.addEventListener('click', addReading);
+    elements.downloadBtn.addEventListener('click', downloadResults);
+    
+    // Set up Transfer Characteristics Chart
+    const transferChartCtx = document.getElementById('transferChart').getContext('2d');
+    const transferChart = new Chart(transferChartCtx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Vout vs Vin',
+            borderColor: '#1e40af',
+            backgroundColor: 'rgba(37, 99, 235, 0)',
+            borderWidth: 2.5,
+            pointRadius: 0,
+            tension: 0.2,
+            data: [] // Start with no data in the curve
+          },
+          {
+            label: 'Current Readings',
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderWidth: 0,
+            pointRadius: 5,
+            pointBackgroundColor: '#ef4444',
+            data: []
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 300
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            title: {
+              display: true,
+              text: 'Input Voltage (V)'
+            },
+            min: 0,
+            max: 5,
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              color: 'rgba(226, 232, 240, 0.3)',
+              lineWidth: 0.5
+            },
+            ticks: {
+              stepSize: 0.5
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Output Voltage (V)'
+            },
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              color: 'rgba(226, 232, 240, 0.3)',
+              lineWidth: 0.5
+            },
+            adapative: true
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                const point = context.raw;
+                if (context.datasetIndex === 1) { // Current readings dataset
+                  return [
+                    `Vin: ${point.x.toFixed(2)}V`,
+                    `Vout: ${point.y.toFixed(2)}V`,
+                    `Ic: ${point.ic?.toFixed(2) || 'N/A'}mA`,
+                    `Gain: ${point.gain?.toFixed(2) || 'N/A'}`
+                  ];
+                }
+                return `Vout: ${point.y.toFixed(4)}V`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Generate the transfer curve points
+    function generateTransferCurve() {
+      const points = [];
+      const stepSize = 0.1; // Step size for curve
+      
+      // Save current VIN value so we can restore it
+      const currentVin = parseFloat(elements.vinSlider.value);
+      
+      // Calculate curve points across the VIN range
+      for (let vin = 0; vin <= 5; vin += stepSize) {
+        // Temporarily set VIN slider to this value for calculation
+        elements.vinSlider.value = vin;
+        
+        // Get values based on this VIN
+        const bjtValues = calculateBJTValues();
+        
+        // Add point to array
+        points.push({x: vin, y: bjtValues.vout});
+      }
+      
+      // Restore original VIN value
+      elements.vinSlider.value = currentVin;
+      
+      return points;
+    }
+    
+    // Calculate BJT values based on current slider settings
+    function calculateBJTValues() {
+      const vcc = parseFloat(elements.vccSlider.value);
+      const vin = parseFloat(elements.vinSlider.value);
+      const rc = parseFloat(elements.rcSlider.value) * 1000; // Convert to ohms
+      const rb = parseFloat(elements.rbSlider.value) * 1000; // Convert to ohms
+      const re = parseFloat(elements.reSlider.value); // Already in ohms
+      const rl = parseFloat(elements.rlSlider.value) * 1000; // Convert to ohms
+      const beta = parseFloat(elements.betaSlider.value);
+      const vbe = 0.7; // Base-emitter voltage drop
+      
+      // Calculate base current
+      let ib = 0;
+      
+      if (vin <= 0.5) {
+        ib = 0; // Completely off below 0.5V
+      } else if (vin <= 0.7) {
+        // Gradual turn-on
+        ib = (vin - 0.5) / 0.2 * 0.01 * (vin / rb);
+      } else {
+        // Active region
+        ib = (vin - 0.7) / rb;
+      }
+      
+      // Calculate collector current
+      const ic = beta * ib; // in mA
+      
+      // Calculate output voltage
+      let vout = vcc - (ic * rc / 1000);
+      
+      // Limit to saturation voltage
+      if (vout < 0.2) {
+        vout = 0.2;
+      }
+      
+      // Calculate voltage gain
+      const ve = ic * re / 1000; // Emitter voltage
+      const rin = rb * beta * (re / 1000) / (rb + beta * (re / 1000));
+      const gain = -(rc / (re + 25/ic));
+      
+      return {
+        ib: ib * 1000, // Convert to μA for display
+        ic: ic,
+        vout: vout,
+        gain: gain
+      };
+    }
+    
+    // Function to add reading
+    function addReading() {
+      const vin = parseFloat(elements.vinSlider.value);
+      const bjtValues = calculateBJTValues();
+      
+      // Get the actual BJT values based on current slider positions
+      const vout = bjtValues.vout;
+      const ic = bjtValues.ic;
+      const ib = bjtValues.ib;
+      const gain = Math.abs(bjtValues.gain);
+      
+      // Create a new row
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${vin.toFixed(2)}</td>
+        <td>${vout.toFixed(4)}</td>
+        <td>${ic.toFixed(2)}</td>
+        <td>${ib.toFixed(2)}</td>
+        <td>${gain.toFixed(1)}</td>
+      `;
+      
+      // Add to the table
+      elements.observationTableBody.appendChild(row);
+      
+      // Add to the chart as a point in dataset 1 (readings)
+      transferChart.data.datasets[1].data.push({
+        x: vin,
+        y: vout,
+        ic: ic,
+        ib: ib,
+        gain: gain
+      });
+      
+      // Also add to dataset 0 (curve) to show the line connecting readings
+      // This matches the MOSFET simulator behavior
+      transferChart.data.datasets[0].data.push({
+        x: vin,
+        y: vout
+      });
+      
+      // Sort data points by x value in both datasets
+      transferChart.data.datasets[0].data.sort((a, b) => a.x - b.x);
+      transferChart.data.datasets[1].data.sort((a, b) => a.x - b.x);
+      
+      // Update chart
+      transferChart.update();
+      
+      // Visual feedback
+      const chartContainer = document.querySelector('.chart-container');
+      chartContainer.style.transition = 'background-color 0.3s';
+      chartContainer.style.backgroundColor = 'rgba(37, 99, 235, 0.1)';
+      setTimeout(() => {
+        chartContainer.style.backgroundColor = 'transparent';
+      }, 300);
+    }
+    
+    // Update all values based on slider positions
+    function updateValues() {
+      // Update display values
+      elements.vccValue.textContent = elements.vccSlider.value;
+      elements.vinValue.textContent = elements.vinSlider.value;
+      elements.rcValue.textContent = elements.rcSlider.value;
+      elements.rbValue.textContent = elements.rbSlider.value;
+      elements.reValue.textContent = elements.reSlider.value;
+      elements.rlValue.textContent = elements.rlSlider.value;
+      elements.betaValue.textContent = elements.betaSlider.value;
+      
+      // Update SVG display values
+      svgElements.vccSourceValue.textContent = elements.vccSlider.value + 'V';
+      svgElements.vinSourceValue.textContent = elements.vinSlider.value + 'V';
+      svgElements.rcValueSvg.textContent = elements.rcSlider.value + 'kΩ';
+      svgElements.rbValueSvg.textContent = elements.rbSlider.value + 'kΩ';
+      svgElements.reValueSvg.textContent = elements.reSlider.value + 'Ω';
+      svgElements.rlValueSvg.textContent = elements.rlSlider.value + 'kΩ';
+      
+      // Update BJT parameters
+      svgElements.betaParamValue.textContent = elements.betaSlider.value;
+      
+      // Calculate BJT values
+      const bjtValues = calculateBJTValues();
+      
+      // Update the output values
+      svgElements.voutSourceValue.textContent = bjtValues.vout.toFixed(2) + 'V';
+      svgElements.icValue.textContent = bjtValues.ic.toFixed(2) + 'mA';
+      svgElements.ibValue.textContent = bjtValues.ib.toFixed(2) + 'μA';
+      svgElements.gainValue.textContent = Math.abs(bjtValues.gain).toFixed(1);
+      
+      // We don't update the curve automatically here anymore
+      
+      // Ensure the chart is updated
+      transferChart.update();
+      
+      // Adjust BJT visualization based on current
+      const bjt = document.querySelector('#bjt');
+      if (bjt) {
+        const ic = bjtValues.ic;
+        const baseScale = 1 + Math.min(1, ic / 20); // Scale based on current, max 2x
+        bjt.setAttribute('transform', `translate(250,250) scale(${baseScale})`);
+        
+        // Change arrow color based on current
+        const arrow = bjt.querySelector('path');
+        if (arrow) {
+          if (ic < 0.1) {
+            arrow.setAttribute('stroke', '#6b7280'); // Gray for almost off
+          } else if (ic > 10) {
+            arrow.setAttribute('stroke', '#ef4444'); // Red for high current
+          } else {
+            arrow.setAttribute('stroke', '#2563eb'); // Blue for normal operation
+          }
+        }
+      }
+      
+      // Adjust current indicators
+      const currentPaths = document.querySelectorAll('#current-flow polyline');
+      if (currentPaths.length > 0) {
+        const ic = bjtValues.ic;
+        const basethickness = 2;
+        const maxThickness = 6;
+        const newThickness = Math.min(basethickness + ic / 5, maxThickness);
+        
+        // Change current color based on magnitude
+        let currentColor = '#2563eb'; // Default blue
+        
+        if (ic < 0.1) {
+          currentColor = '#6b7280'; // Gray for low current
+        } else if (ic > 10) {
+          currentColor = '#ef4444'; // Red for high current
+        }
+        
+        // Apply to all current indicators
+        currentPaths.forEach(path => {
+          path.setAttribute('stroke-width', newThickness);
+          path.setAttribute('stroke', currentColor);
+          
+          // Add flowing animation for current
+          if (ic > 0.1 && !path.hasAttribute('data-animated')) {
+            path.setAttribute('data-animated', 'true');
+            path.setAttribute('stroke-dasharray', '1,12');
+            
+            const flowAnimate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            flowAnimate.setAttribute('attributeName', 'stroke-dasharray');
+            flowAnimate.setAttribute('values', '1,12;12,1;1,12');
+            flowAnimate.setAttribute('dur', (3 / Math.max(0.1, ic)) + 's'); // Faster animation for higher current
+            flowAnimate.setAttribute('repeatCount', 'indefinite');
+            path.appendChild(flowAnimate);
+          } else if (ic <= 0.1) {
+            // Remove animation in cut-off region
+            path.removeAttribute('data-animated');
+            path.setAttribute('stroke-dasharray', '');
+            const animate = path.querySelector('animate');
+            if (animate) path.removeChild(animate);
+          }
+        });
+        
+        // Update arrowhead color to match current
+        const arrowhead = document.querySelector('#arrowhead polygon');
+        if (arrowhead) {
+          arrowhead.setAttribute('fill', currentColor);
+        }
+      }
+    }
+    
+    // Clear all readings
+    function clearData() {
+      transferChart.data.datasets[1].data = [];
+      transferChart.update();
+      elements.observationTableBody.innerHTML = '';
+    }
+    
+    // Check if we came from a specific activity
+    function getURLParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Set initial state based on activity source
+    function initializeFromActivity() {
+      const activitySource = getURLParameter('activity');
+      
+      // Reset values to defaults
+      elements.vccSlider.value = 12.0;
+      elements.vinSlider.value = 2.0;
+      elements.rcSlider.value = 1.0;
+      elements.rbSlider.value = 10.0;
+      elements.reSlider.value = 220;
+      elements.rlSlider.value = 10.0;
+      elements.betaSlider.value = 100;
+      
+      // Force graph update immediately
+      updateValues();
+      
+      // Clear any existing data points
+      clearData();
+      
+      if (activitySource === 'completed') {
+        // Add multiple readings to show a complete experiment
+        addReading(); // Initial value
+        
+        // Create a sweep of input voltages
+        for (let vin = 0.5; vin <= 4.5; vin += 0.5) {
+          elements.vinSlider.value = vin;
+          updateValues();
+          addReading();
+        }
+        
+      } else if (activitySource === 'in-progress') {
+        // Add some readings to show partial completion
+        addReading(); // Initial value
+        
+        // Create a partial sweep
+        for (let vin = 1.0; vin <= 3.0; vin += 0.5) {
+          elements.vinSlider.value = vin;
+          updateValues();
+          addReading();
+        }
+      }
+    }
+    
+    // Call initialization from activity if applicable
+    initializeFromActivity();
+    
+    // Make sure values are updated on initial load
+    updateValues();
+    
+    // Start with a single point for the initial condition
+    // This makes it match how the MOSFET simulator works
+    addReading();
+
+    // Add to BJT amplifier script
+    document.addEventListener('DOMContentLoaded', function() {
+      // Ensure table is empty on page load
+      if (elements.observationTableBody) {
+        elements.observationTableBody.innerHTML = '';
+      }
+    });
+
+    // Add download functionality
+    function downloadResults() {
+      // Create PDF document with jsPDF
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Add title to the PDF
+      doc.setFontSize(18);
+      doc.text("BJT Amplifier Simulation Results", 14, 20);
+      
+      // Add timestamp
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+      doc.setFontSize(10);
+      doc.text(`Generated: ${timestamp}`, 14, 30);
+
+      // Add circuit parameters
+      doc.setFontSize(12);
+      doc.text("Circuit Parameters:", 14, 40);
+      doc.setFontSize(10);
+      doc.text(`Input Voltage (VIN): ${elements.vinValue.textContent} V`, 14, 48);
+      doc.text(`Base Resistor (RB): ${elements.rbValue.textContent} kΩ`, 14, 54);
+      doc.text(`Collector Resistor (RC): ${elements.rcValue.textContent} kΩ`, 14, 60);
+      doc.text(`Emitter Resistor (RE): ${elements.reValue.textContent} kΩ`, 14, 66);
+      doc.text(`Load Resistor (RL): ${elements.rlValue.textContent} kΩ`, 14, 72);
+      doc.text(`Current Gain (β): ${elements.betaValue.textContent}`, 14, 78);
+      
+      // Add the observations table
+      doc.text("Observation Data:", 14, 88);
+      
+      // Create array for autoTable
+      const tableRows = [];
+      const tableColumns = [
+        { header: 'VIN (V)', dataKey: 'vin' },
+        { header: 'VOUT (V)', dataKey: 'vout' },
+        { header: 'Gain', dataKey: 'gain' }
+      ];
+      
+      // Get data from table
+      const rows = elements.observationTableBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        tableRows.push({
+          vin: cells[0].textContent,
+          vout: cells[1].textContent,
+          gain: cells[2].textContent
+        });
+      });
+      
+      // Add table to PDF
+      doc.autoTable({
+        head: [tableColumns.map(col => col.header)],
+        body: tableRows.map(row => [row.vin, row.vout, row.gain]),
+        startY: 91,
+        theme: 'grid',
+        styles: { fontSize: 8 }
+      });
+      
+      // Calculate position for graph (after table)
+      const finalY = doc.lastAutoTable.finalY || 120;
+      
+      // Add chart as image
+      doc.text("Voltage Transfer Characteristic:", 14, finalY + 10);
+      
+      // Convert chart to image
+      const canvas = document.getElementById('transferChart');
+      const chartImage = canvas.toDataURL('image/png', 1.0);
+      doc.addImage(chartImage, 'PNG', 14, finalY + 15, 180, 80);
+      
+      // Save the PDF
+      doc.save('bjt_amplifier_results.pdf');
+      
+      // Show success message to user
+      showNotification('Results successfully downloaded as PDF', 'success');
+    }
+    
+    // Add notification function
+    function showNotification(message, type) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      // Apply styles
+      notification.style.position = 'fixed';
+      notification.style.top = '20px';
+      notification.style.right = '20px';
+      notification.style.padding = '10px 20px';
+      notification.style.borderRadius = '5px';
+      notification.style.fontSize = '14px';
+      notification.style.zIndex = '1000';
+      notification.style.transition = 'opacity 0.3s';
+      
+      // Apply color based on type
+      if (type === 'success') {
+        notification.style.backgroundColor = '#5a2ca0';  // Royal purple
+        notification.style.color = 'white';
+      } else {
+        notification.style.backgroundColor = '#e74c3c';  // Red
+        notification.style.color = 'white';
+      }
+      
+      // Add to document
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html> 

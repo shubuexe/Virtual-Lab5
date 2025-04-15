@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Electronic Circuit Simulation Lab - Educational platform for learning electronics">
+  <title>Electronic Circuit Simulation Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js" defer></script>
+  <script src="home.js" defer></script>
+  <style>
+    /* Global CSS Variables */
+    :root {
+      --primary-color: #5a2ca0; /* Royal purple */
+      --secondary-color: #8e44ad; /* Lighter purple */
+      --accent-color: #f39c12; /* Gold accent */
+      --warning-color: #e67e22; /* Orange */
+      --danger-color: #e74c3c; /* Red */
+      --paper: #ffffff;
+      --text-primary: #2c3e50;
+      --text-secondary: #596275;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius-sm: 0.25rem;
+      --radius-md: 0.375rem;
+      --radius-lg: 0.5rem;
+    }
+    
+    [data-theme="dark"] {
+      --primary-color: #9061c2; /* Lighter purple for dark mode */
+      --secondary-color: #a55eea; /* Even lighter purple */
+      --accent-color: #f7b731; /* Brighter gold for contrast */
+      --warning-color: #fa8231; /* Brighter orange */
+      --danger-color: #ff5e57; /* Brighter red */
+      --paper: #18152e; /* Dark purple-tinted background */
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --border-color: #4a3c78; /* Dark purple border */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.26);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Enhanced Welcome Banner (below header) */
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(245,247,250,1) 0%, rgba(240,244,252,1) 100%);
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 18px 25px;
+      margin-bottom: 20px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      max-width: 1150px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .welcome-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    /* More subtle icon container */
+    .welcome-icon-container {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(90, 44, 160, 0.2);
+      background-color: rgba(90, 44, 160, 0.05);
+      flex-shrink: 0;
+    }
+    
+    /* Subtle animated wave */
+    .wave-icon {
+      position: relative;
+      width: 20px;
+      height: 20px;
+    }
+    
+    .wave-icon::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      opacity: 0.15;
+      animation: pulse-subtle 2s infinite;
+    }
+    
+    .wave-icon::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+    }
+    
+    .wave-line {
+      position: absolute;
+      width: 12px;
+      height: 1px;
+      background-color: var(--primary-color);
+      opacity: 0.8;
+    }
+    
+    .wave-line:nth-child(1) {
+      top: 5px;
+      left: 12px;
+      transform: rotate(35deg);
+    }
+    
+    .wave-line:nth-child(2) {
+      top: 10px;
+      left: 12px;
+    }
+    
+    .wave-line:nth-child(3) {
+      top: 15px;
+      left: 12px;
+      transform: rotate(-35deg);
+    }
+    
+    .welcome-text {
+      flex: 1;
+    }
+    
+    .welcome-greeting {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-name {
+      color: var(--primary-color);
+    }
+    
+    .welcome-message {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+    
+    .welcome-suggestion {
+      background-color: rgba(90, 44, 160, 0.05); /* Light purple background */
+      border-left: 3px solid var(--primary-color);
+      padding: 10px 15px;
+      margin-top: 10px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.95rem;
+    }
+    
+    .welcome-suggestion strong {
+      color: var(--primary-color);
+    }
+    
+    [data-theme="dark"] .welcome-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(30, 41, 59, 1) 100%);
+    }
+    
+    [data-theme="dark"] .welcome-suggestion {
+      background-color: rgba(37, 99, 235, 0.1);
+    }
+    
+    [data-theme="dark"] .welcome-icon-container {
+      border-color: rgba(144, 97, 194, 0.3);
+      background-color: rgba(144, 97, 194, 0.1);
+    }
+    
+    /* Animation styles restored for site opening */
+    .intro-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--paper);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+    }
+    
+    .intro-animation.fade-out {
+      opacity: 0;
+      transform: scale(1.1);
+      pointer-events: none;
+    }
+    
+    .intro-content {
+      text-align: center;
+      transform: translateY(10px);
+      opacity: 0;
+      animation: fade-in 1.2s ease-out forwards;
+    }
+    
+    .intro-title {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      opacity: 0;
+      animation: fade-in 1.2s ease-out 0.2s forwards;
+      transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+    }
+    
+    .intro-subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-bottom: 25px;
+      opacity: 0;
+      animation: fade-in 1.2s ease-out 0.6s forwards;
+      transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+    }
+    
+    .intro-divider {
+      width: 40px;
+      height: 2px;
+      background-color: var(--primary-color);
+      margin: 0 auto 25px;
+      transform: scaleX(0);
+      animation: extend 1.2s ease-out 0.8s forwards;
+      transition: transform 1.5s ease-out, opacity 1.5s ease-out;
+    }
+    
+    /* Simple thinking animation - just dots */
+    .thinking-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      opacity: 0;
+    }
+    
+    .dot-1 {
+      animation: pulse 1.5s ease-out 1.5s infinite;
+    }
+    
+    .dot-2 {
+      animation: pulse 1.5s ease-out 1.8s infinite;
+    }
+    
+    .dot-3 {
+      animation: pulse 1.5s ease-out 2.1s infinite;
+    }
+    
+    @keyframes fade-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes extend {
+      to {
+        transform: scaleX(1);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+    }
+    
+    .intro-animation.fade-out .intro-title {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    
+    .intro-animation.fade-out .intro-subtitle {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    
+    .intro-animation.fade-out .intro-divider {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .welcome-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .welcome-icon-container {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .welcome-greeting {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* Fix for tab content visibility */
+    .tab-content.active {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* Update activity progress bar colors */
+    .activity-icon.completed {
+      background-color: #5a2ca0; /* Royal purple */
+    }
+    
+    .activity-icon.in-progress {
+      background-color: #8e44ad; /* Lighter purple */
+    }
+    
+    /* Update action buttons */
+    .action-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+    
+    .action-btn:hover {
+      background-color: #4a2483; /* Darker purple */
+    }
+    
+    /* Add hover effect to activity items */
+    .activity-item {
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+    
+    .activity-item:hover {
+      background-color: #f8f5ff; /* Very light purple */
+    }
+    
+    /* Make primary buttons more visible with the purple theme */
+    .primary-btn {
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    
+    .primary-btn:hover {
+      background-color: #4a2483; /* Darker purple */
+    }
+    
+    .secondary-btn {
+      background-color: transparent;
+      color: #5a2ca0; /* Royal purple */
+      border: 1px solid #5a2ca0;
+      padding: 7px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .secondary-btn:hover {
+      background-color: rgba(90, 44, 160, 0.1); /* Light purple */
+    }
+  </style>
+</head>
+<body>
+  <!-- Site opening animation -->
+  <div class="intro-animation" id="introAnimation">
+    <div class="intro-content">
+      <h1 class="intro-title">Electronic Circuit Simulation Lab</h1>
+      <div class="intro-divider"></div>
+      <p class="intro-subtitle">Shree L.R Tiwari College of Engineering</p>
+      
+      <!-- Simple thinking dots -->
+      <div class="thinking-dots">
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Animation control script
+    (function() {
+      const introAnimation = document.getElementById('introAnimation');
+      
+      // Display animation for 3 seconds then fade out
+      setTimeout(function() {
+        if (introAnimation) {
+          introAnimation.classList.add('fade-out');
+          
+          // Remove from DOM after transition
+          setTimeout(function() {
+            if (introAnimation && introAnimation.parentNode) {
+              introAnimation.parentNode.removeChild(introAnimation);
+            }
+          }, 1500);
+        }
+      }, 3000);
+    })();
+  </script>
+
+  <!-- Profile Sidebar -->
+  <div class="profile-sidebar" id="profileSidebar">
+    <div class="profile-content">
+      <button class="close-sidebar" id="closeSidebar">&times;</button>
+      <div class="sidebar-avatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+      <div class="profile-header">
+        <div class="profile-info">
+          <h2>Shubham Patel</h2>
+          <div class="user-level">ADVANCED LEVEL</div>
+          <p class="user-title">Electronics and Computer Science Engineering Student</p>
+          <div class="progress-container">
+            <span>Progress to next level:</span>
+            <span>75%</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-stats">
+        <div class="stat-card" data-tab-target="completed">
+          <span class="stat-value">12</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-card" data-tab-target="in-progress">
+          <span class="stat-value">3</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-card" data-tab-target="pending">
+          <span class="stat-value">5</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+      
+      <div class="theme-toggle-container">
+        <span>Theme</span>
+        <button id="themeToggle" class="theme-toggle-btn">
+          <span class="light-icon">☀</span>
+          <span class="dark-icon">☾</span>
+          <span class="toggle-slider"></span>
+        </button>
+      </div>
+      
+      <div class="profile-actions">
+        <button class="sign-out-btn">Sign Out</button>
+        <button class="delete-account-btn">Delete My Account</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page Overlay -->
+  <div class="page-overlay" id="pageOverlay"></div>
+  
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-content">
+      <div class="logo-container">
+        <h1 class="site-title">Electronic Circuit Simulation Lab</h1>
+        <p class="college-name"><a href="https://slrtce.in/" target="_blank">Shree L.R Tiwari College Of Engineering</a></p>
+      </div>
+      <nav class="main-nav" id="mainNavigation">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="mosfet_simulator.html">MOSFET Simulator</a></li>
+          <li><a href="bjt_amplifier.html">BJT Amplifier</a></li>
+          <li><a href="inverting_amplifier.html">Inverting Amplifier</a></li>
+          <li><a href="coming_soon.html?circuit=logic-gates">Logic Gates</a></li>
+        </ul>
+      </nav>
+      <!-- Avatar Toggle Button -->
+      <div class="avatar-toggle" id="profileAvatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+    </div>
+  </header>
+  
+  <!-- Enhanced Welcome Banner with Subtle Icon (below header) -->
+  <div class="welcome-banner" id="welcomeBanner">
+    <div class="welcome-content">
+      <div class="welcome-icon-container">
+        <span class="welcome-icon">👋</span>
+      </div>
+      <div class="welcome-text">
+        <div class="welcome-greeting">
+          Good <span id="timeGreeting">morning</span>, <span class="user-name" id="userName">Shubham</span>!
+        </div>
+        <div class="welcome-message">
+          Welcome to your Electronic Circuit Simulation Lab. We're excited to help you deepen your understanding of electronic circuits through interactive simulations.
+        </div>
+        <div class="welcome-suggestion">
+          <strong>Tip:</strong> Start with the <strong>MOSFET Simulator</strong> to explore voltage-current characteristics, or try the <strong>BJT Amplifier</strong> for signal amplification analysis.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <main class="container dashboard">
+    <!-- Circuit Showcase Section -->
+    <section class="section showcase-section">
+      <h2>Circuit Diagrams</h2>
+      <div class="showcase-container">
+        <!-- MOSFET Circuits Category -->
+        <div class="showcase-category">
+          <h3>MOSFET Circuits</h3>
+          <div class="showcase-grid">
+            <div class="circuit-card" data-circuit="mosfet-amplifier">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (2).jpeg" alt="MOSFET Circuit">
+              </div>
+              <div class="circuit-info">
+                <h4>MOSFET Amplifier</h4>
+                <p>Common source amplifier configuration</p>
+              </div>
+            </div>
+            <div class="circuit-card" data-circuit="current-mirror">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (1).jpeg" alt="Current Mirror Circuit">
+              </div>
+              <div class="circuit-info">
+                <h4>Current Mirror</h4>
+                <p>Basic MOSFET current mirror design</p>
+              </div>
+            </div>
+            <div class="circuit-card" data-circuit="cmos-inverter">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.22.jpeg" alt="CMOS Inverter">
+              </div>
+              <div class="circuit-info">
+                <h4>CMOS Inverter</h4>
+                <p>Complementary MOS logic inverter</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Amplifier Designs Category -->
+        <div class="showcase-category">
+          <h3>Amplifier Designs</h3>
+          <div class="showcase-grid">
+            <div class="circuit-card" data-circuit="differential-amplifier">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21.jpeg" alt="Differential Amplifier">
+              </div>
+              <div class="circuit-info">
+                <h4>Differential Amplifier</h4>
+                <p>MOSFET-based differential pair</p>
+              </div>
+            </div>
+            <div class="circuit-card" data-circuit="common-source">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (2).jpeg" alt="Common Source Amplifier">
+              </div>
+              <div class="circuit-info">
+                <h4>Common Source</h4>
+                <p>Single-stage amplifier with bias</p>
+              </div>
+            </div>
+            <div class="circuit-card" data-circuit="jfet-amplifier">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.20 (1).jpeg" alt="JFET Amplifier">
+              </div>
+              <div class="circuit-info">
+                <h4>JFET Amplifier</h4>
+                <p>Junction FET-based amplifier circuit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Special Circuits Category -->
+        <div class="showcase-category">
+          <h3>Special Circuits</h3>
+          <div class="showcase-grid">
+            <div class="circuit-card" data-circuit="schmitt-trigger">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.19 (1).jpeg" alt="Schmitt Trigger">
+              </div>
+              <div class="circuit-info">
+                <h4>Schmitt Trigger</h4>
+                <p>Hysteresis-based voltage comparator</p>
+              </div>
+            </div>
+            <div class="circuit-card" data-circuit="sequential-logic">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.19.jpeg" alt="Sequential Logic">
+              </div>
+              <div class="circuit-info">
+                <h4>Sequential Logic</h4>
+                <p>D flip-flop-based sequential circuit</p>
+              </div>
+            </div>
+            <div class="circuit-card" data-circuit="pll">
+              <div class="circuit-image">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.19 (2).jpeg" alt="Phase-Locked Loop">
+              </div>
+              <div class="circuit-info">
+                <h4>Phase-Locked Loop</h4>
+                <p>Frequency synchronization circuit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Circuit Modal -->
+    <div class="circuit-modal" id="circuitModal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-body">
+          <div class="modal-image">
+            <img id="modalImage" src="" alt="Circuit Diagram">
+          </div>
+          <div class="modal-details">
+            <h3 id="modalTitle"></h3>
+            <div class="modal-tabs">
+              <button class="modal-tab active" data-tab="description">Description</button>
+              <button class="modal-tab" data-tab="formulas">Key Formulas</button>
+              <button class="modal-tab" data-tab="instructions">Instructions</button>
+            </div>
+            <div class="modal-tab-content active" id="description">
+              <p id="modalDescription"></p>
+            </div>
+            <div class="modal-tab-content" id="formulas">
+              <div id="modalFormulas"></div>
+            </div>
+            <div class="modal-tab-content" id="instructions">
+              <ol id="modalInstructions"></ol>
+            </div>
+            <div class="modal-actions">
+              <button id="simulateBtn" class="primary-btn">Open Simulator</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Activity Section -->
+    <section class="section activity-section">
+      <h2>Recent Activity</h2>
+      <div class="activity-timeline">
+        <div class="activity-item" onclick="window.location.href='mosfet_simulator.html?activity=completed'">
+          <div class="activity-icon completed"></div>
+          <div class="activity-content">
+            <h3>MOSFET Amplifier Simulation</h3>
+            <p class="activity-time">Yesterday at 2:30 PM</p>
+            <p class="activity-details">Completed with 92% efficiency</p>
+          </div>
+          <div class="activity-actions">
+            <a href="mosfet_simulator.html?activity=completed" class="action-btn">View Results</a>
+          </div>
+          <div class="activity-progress-bar" style="width: 100%;"></div>
+        </div>
+        
+        <div class="activity-item" onclick="window.location.href='bjt_amplifier.html?activity=in-progress'">
+          <div class="activity-icon in-progress"></div>
+          <div class="activity-content">
+            <h3>BJT Common Emitter Amplifier</h3>
+            <p class="activity-time">Today at 10:15 AM</p>
+            <p class="activity-details">In progress - 65% completed</p>
+          </div>
+          <div class="activity-actions">
+            <a href="bjt_amplifier.html?activity=in-progress" class="action-btn">Continue</a>
+          </div>
+          <div class="activity-progress-bar" style="width: 65%;"></div>
+        </div>
+        
+        <div class="activity-item" onclick="window.location.href='inverting_amplifier.html?activity=pending'">
+          <div class="activity-icon pending"></div>
+          <div class="activity-content">
+            <h3>Inverting Amplifier Circuit</h3>
+            <p class="activity-time">Assigned on Apr 5, 2025</p>
+            <p class="activity-details">Not started yet</p>
+          </div>
+          <div class="activity-actions">
+            <a href="inverting_amplifier.html?activity=pending" class="action-btn">Start</a>
+          </div>
+          <div class="activity-progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Experiments and Recommendations Section -->
+    <div class="experiments-container">
+      <!-- My Experiments Section -->
+      <section class="section experiments-section">
+        <h2>My Experiments</h2>
+        <div class="experiments-tabs">
+          <button class="tab-btn active" data-tab="completed" id="completedTab">Completed</button>
+          <button class="tab-btn" data-tab="in-progress" id="inProgressTab">In Progress</button>
+          <button class="tab-btn" data-tab="pending" id="pendingTab">Pending</button>
+        </div>
+        
+        <!-- Completed Experiments Tab -->
+        <div class="tab-content active" id="completed" style="display: block;">
+          <div class="experiment-grid">
+            <div class="experiment-card" onclick="window.location.href='mosfet_simulator.html?activity=completed'">
+              <div class="experiment-img">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (2).jpeg" alt="MOSFET Simulator">
+              </div>
+              <div class="experiment-details">
+                <h3>MOSFET V-I Characteristics</h3>
+                <p class="experiment-date">Completed on Apr 2, 2025</p>
+                <div class="experiment-stats">
+                  <span class="stat">Grade: A</span>
+                  <span class="stat">Score: 95%</span>
+                </div>
+                <a href="mosfet_simulator.html?activity=completed" class="experiment-link">Review</a>
+              </div>
+            </div>
+            
+            <div class="experiment-card" onclick="window.location.href='bjt_amplifier.html?activity=completed'">
+              <div class="experiment-img">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.22 (1).jpeg" alt="BJT Circuit">
+              </div>
+              <div class="experiment-details">
+                <h3>BJT Amplifier</h3>
+                <p class="experiment-date">Completed on Mar 25, 2025</p>
+                <div class="experiment-stats">
+                  <span class="stat">Grade: A-</span>
+                  <span class="stat">Score: 89%</span>
+                </div>
+                <a href="bjt_amplifier.html?activity=completed" class="experiment-link">Review</a>
+              </div>
+            </div>
+            
+            <div class="experiment-card" onclick="window.location.href='inverting_amplifier.html?activity=completed'">
+              <div class="experiment-img">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.20 (2).jpeg" alt="Op-Amp Circuit">
+              </div>
+              <div class="experiment-details">
+                <h3>Inverting Amplifier</h3>
+                <p class="experiment-date">Completed on Mar 15, 2025</p>
+                <div class="experiment-stats">
+                  <span class="stat">Grade: B+</span>
+                  <span class="stat">Score: 87%</span>
+                </div>
+                <a href="inverting_amplifier.html?activity=completed" class="experiment-link">Review</a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="view-more">
+            <button class="secondary-btn">View All Completed (12)</button>
+          </div>
+        </div>
+        
+        <!-- In Progress Experiments Tab -->
+        <div class="tab-content" id="in-progress" style="display: none;">
+          <div class="experiment-grid">
+            <!-- First experiment card -->
+            <div class="experiment-card" onclick="window.location.href='mosfet_simulator.html?activity=in-progress'">
+              <div class="experiment-img" style="background-color: #e5e7eb;">
+                <div class="progress-overlay">65% Complete</div>
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (2).jpeg" alt="Common Source Amplifier" onerror="this.parentNode.style.backgroundColor='#e5e7eb';this.style.display='none';">
+              </div>
+              <div class="experiment-details">
+                <h3>Common Source Amplifier</h3>
+                <p class="experiment-date">Started on Apr 4, 2025</p>
+                <div class="experiment-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                  </div>
+                </div>
+                <a href="mosfet_simulator.html?activity=in-progress" class="experiment-link">Continue</a>
+              </div>
+            </div>
+            
+            <!-- Second experiment card -->
+            <div class="experiment-card" onclick="window.location.href='bjt_amplifier.html?activity=in-progress'">
+              <div class="experiment-img" style="background-color: #e5e7eb;">
+                <div class="progress-overlay">45% Complete</div>
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.22 (1).jpeg" alt="BJT Amplifier" onerror="this.parentNode.style.backgroundColor='#e5e7eb';this.style.display='none';">
+              </div>
+              <div class="experiment-details">
+                <h3>BJT Common Emitter Amplifier</h3>
+                <p class="experiment-date">Started on Apr 5, 2025</p>
+                <div class="experiment-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%"></div>
+                  </div>
+                </div>
+                <a href="bjt_amplifier.html?activity=in-progress" class="experiment-link">Continue</a>
+              </div>
+            </div>
+            
+            <!-- Third experiment card -->
+            <div class="experiment-card" onclick="window.location.href='coming_soon.html?circuit=active-filter'">
+              <div class="experiment-img" style="background-color: #e5e7eb;">
+                <div class="progress-overlay">15% Complete</div>
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.22 (2).jpeg" alt="Active Filter Design" onerror="this.parentNode.style.backgroundColor='#e5e7eb';this.style.display='none';">
+              </div>
+              <div class="experiment-details">
+                <h3>Active Filter Design</h3>
+                <p class="experiment-date">Started on Apr 1, 2025</p>
+                <div class="experiment-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 15%"></div>
+                  </div>
+                </div>
+                <a href="coming_soon.html?circuit=active-filter" class="experiment-link">Continue</a>
+              </div>
+            </div>
+            
+            <!-- Fourth experiment card (with proper image) -->
+            <div class="experiment-card" onclick="window.location.href='coming_soon.html?circuit=current-mirror-analysis'">
+              <div class="experiment-img" style="background-color: #e5e7eb;">
+                <div class="progress-overlay">30% Complete</div>
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (1).jpeg" alt="Current Mirror Analysis" onerror="this.parentNode.style.backgroundColor='#e5e7eb';this.style.display='none';">
+              </div>
+              <div class="experiment-details">
+                <h3>Current Mirror Analysis</h3>
+                <p class="experiment-date">Started on Apr 7, 2025</p>
+                <div class="experiment-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 30%"></div>
+                  </div>
+                </div>
+                <a href="coming_soon.html?circuit=current-mirror-analysis" class="experiment-link">Continue</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pending Experiments Tab -->
+        <div class="tab-content" id="pending" style="display: none;">
+          <div class="experiment-grid">
+            <div class="experiment-card" onclick="window.location.href='coming_soon.html?circuit=current-mirror'">
+              <div class="experiment-img pending-img">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.21 (1).jpeg" alt="Current Mirror Circuit">
+              </div>
+              <div class="experiment-details">
+                <h3>Current Mirror Circuit</h3>
+                <p class="experiment-date">Due by Apr 15, 2025</p>
+                <p class="experiment-difficulty">Difficulty: Intermediate</p>
+                <a href="coming_soon.html?circuit=current-mirror" class="experiment-link">Start</a>
+              </div>
+            </div>
+            
+            <div class="experiment-card" onclick="window.location.href='inverting_amplifier.html?activity=pending'">
+              <div class="experiment-img pending-img">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.20 (2).jpeg" alt="Inverting Amplifier">
+              </div>
+              <div class="experiment-details">
+                <h3>Inverting Amplifier</h3>
+                <p class="experiment-date">Due by Apr 18, 2025</p>
+                <p class="experiment-difficulty">Difficulty: Intermediate</p>
+                <a href="inverting_amplifier.html?activity=pending" class="experiment-link">Start</a>
+              </div>
+            </div>
+            
+            <div class="experiment-card" onclick="window.location.href='coming_soon.html?circuit=sequential-logic'">
+              <div class="experiment-img pending-img">
+                <img src="images/WhatsApp Image 2025-04-10 at 14.45.19.jpeg" alt="Digital Logic">
+              </div>
+              <div class="experiment-details">
+                <h3>Sequential Logic Circuits</h3>
+                <p class="experiment-date">Due by Apr 25, 2025</p>
+                <p class="experiment-difficulty">Difficulty: Intermediate</p>
+                <a href="coming_soon.html?circuit=sequential-logic" class="experiment-link">Start</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Recommended Section -->
+      <section class="section recommended-section">
+        <h2>Recommended For You</h2>
+        <div class="recommended-list">
+          <div class="recommended-item">
+            <div class="recommended-img">
+              <img src="images/WhatsApp Image 2025-04-10 at 14.45.19 (2).jpeg" alt="PLL Circuit">
+            </div>
+            <div class="recommended-details">
+              <h3>Phase-Locked Loop</h3>
+              <p>Based on your interest in oscillators</p>
+            </div>
+            <button class="action-btn small">Add to List</button>
+          </div>
+          
+          <div class="recommended-item">
+            <div class="recommended-img">
+              <img src="images/WhatsApp Image 2025-04-10 at 14.45.20 (1).jpeg" alt="JFET Circuit">
+            </div>
+            <div class="recommended-details">
+              <h3>JFET Characteristics</h3>
+              <p>Related to your MOSFET studies</p>
+            </div>
+            <button class="action-btn small">Add to List</button>
+          </div>
+          
+          <div class="recommended-item">
+            <div class="recommended-img">
+              <img src="images/WhatsApp Image 2025-04-10 at 14.45.19 (1).jpeg" alt="Schmitt Trigger">
+            </div>
+            <div class="recommended-details">
+              <h3>Schmitt Trigger Design</h3>
+              <p>Popular among EE students</p>
+            </div>
+            <button class="action-btn small">Add to List</button>
+          </div>
+          
+          <div class="recommended-item">
+            <div class="recommended-img">
+              <img src="images/WhatsApp Image 2025-04-10 at 14.45.21.jpeg" alt="Differential Amplifier">
+            </div>
+            <div class="recommended-details">
+              <h3>Differential Amplifier</h3>
+              <p>Advanced circuit analysis</p>
+            </div>
+            <button class="action-btn small">Add to List</button>
+          </div>
+          
+          <div class="recommended-item">
+            <div class="recommended-img">
+              <img src="images/WhatsApp Image 2025-04-10 at 14.45.22 (2).jpeg" alt="Active Filter">
+            </div>
+            <div class="recommended-details">
+              <h3>Active Filters</h3>
+              <p>Builds on your amplifier knowledge</p>
+            </div>
+            <button class="action-btn small">Add to List</button>
+          </div>
+          
+          <div class="recommended-item">
+            <div class="recommended-img">
+              <img src="images/WhatsApp Image 2025-04-10 at 14.45.19.jpeg" alt="Sequential Logic">
+            </div>
+            <div class="recommended-details">
+              <h3>D Flip-Flop Circuit</h3>
+              <p>Introduction to sequential logic</p>
+            </div>
+            <button class="action-btn small">Add to List</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <div class="footer-content">
+      <div class="footer-nav">
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms-of-service.html">Terms of Service</a></li>
+        </ul>
+      </div>
+      <p>&copy; <span id="currentYear"></span> Electronic Circuit Simulation Lab - Shree L.R Tiwari College Of Engineering</p>
+    </div>
+  </footer>
+  
+  <!-- Back to Top Script -->
+  <script src="back-to-top.js"></script>
+
+  <!-- JavaScript for Circuit Modal -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get modal elements
+      const modal = document.getElementById('circuitModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalImage = document.getElementById('modalImage');
+      const modalDescription = document.getElementById('modalDescription');
+      const modalFormulas = document.getElementById('modalFormulas');
+      const modalInstructions = document.getElementById('modalInstructions');
+      const simulateBtn = document.getElementById('simulateBtn');
+      const closeModal = document.querySelector('.close-modal');
+      
+      // Circuit data
+      const circuitData = {
+        'mosfet-amplifier': {
+          title: 'MOSFET Amplifier',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.21 (2).jpeg',
+          description: 'The common source MOSFET amplifier is a fundamental circuit in analog electronics. This configuration uses an N-channel enhancement-mode MOSFET to amplify small input signals. The circuit provides voltage gain with a 180-degree phase shift between input and output signals.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Drain Current: I<sub>D</sub> = K(V<sub>GS</sub> - V<sub>TH</sub>)<sup>2</sup></p>
+            <p>Transconductance: g<sub>m</sub> = 2K(V<sub>GS</sub> - V<sub>TH</sub>)</p>
+            <p>Voltage Gain: A<sub>v</sub> = -g<sub>m</sub>(r<sub>o</sub> || R<sub>D</sub>)</p>
+            <p>Input Impedance: Z<sub>in</sub> ≈ R<sub>G</sub></p>
+          `,
+          instructions: `
+            <li>Adjust V<sub>GS</sub> to set the DC bias point (typically 2-4V)</li>
+            <li>Ensure V<sub>DS</sub> > V<sub>GS</sub> - V<sub>TH</sub> for saturation region operation</li>
+            <li>Connect a small AC signal to the gate through a coupling capacitor</li>
+            <li>Observe the amplified output at the drain</li>
+            <li>Use the simulator to plot the I-V characteristics and gain</li>
+          `,
+          simulator: 'mosfet_simulator.html'
+        },
+        'current-mirror': {
+          title: 'Current Mirror',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.21 (1).jpeg',
+          description: 'A current mirror is a circuit designed to copy a current through one active device by controlling the current in another active device, keeping the output current constant regardless of loading.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Output Current: I<sub>OUT</sub> = I<sub>REF</sub> × (W/L)<sub>M2</sub> / (W/L)<sub>M1</sub></p>
+            <p>Matching Accuracy: ΔI/I = 1/√(W×L)</p>
+          `,
+          instructions: `
+            <li>Set the reference current using a resistor or current source</li>
+            <li>Match transistor sizes for better current copying accuracy</li>
+            <li>Keep transistors in saturation for proper operation</li>
+            <li>Observe how output current remains stable despite load changes</li>
+          `,
+          simulator: 'coming_soon.html?circuit=current-mirror'
+        },
+        'cmos-inverter': {
+          title: 'CMOS Inverter',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.22.jpeg',
+          description: 'The CMOS inverter is the fundamental building block of digital logic circuits, using complementary PMOS and NMOS transistors to provide logical NOT operation with low static power consumption.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Propagation Delay: t<sub>p</sub> = 0.69 × R<sub>eq</sub> × C<sub>L</sub></p>
+            <p>Threshold Voltage: V<sub>TH</sub> ≈ V<sub>DD</sub>/2</p>
+            <p>Static Power: P<sub>static</sub> = I<sub>leakage</sub> × V<sub>DD</sub></p>
+          `,
+          instructions: `
+            <li>Apply input voltage and observe output voltage inversion</li>
+            <li>Measure the voltage transfer characteristic curve</li>
+            <li>Determine noise margins and switching threshold</li>
+            <li>Calculate propagation delay with different load capacitances</li>
+          `,
+          simulator: 'coming_soon.html?circuit=cmos-inverter'
+        },
+        'differential-amplifier': {
+          title: 'Differential Amplifier',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.21.jpeg',
+          description: 'A differential amplifier amplifies the difference between two input signals while rejecting common-mode signals, making it ideal for noise reduction and the first stage of operational amplifiers.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Differential Gain: A<sub>d</sub> = g<sub>m</sub> × R<sub>D</sub></p>
+            <p>Common-Mode Gain: A<sub>cm</sub> = 2/g<sub>m</sub>r<sub>ss</sub></p>
+            <p>CMRR: CMRR = A<sub>d</sub>/A<sub>cm</sub></p>
+          `,
+          instructions: `
+            <li>Apply a small differential input signal</li>
+            <li>Set the bias current with the current source</li>
+            <li>Measure the differential and common-mode gains</li>
+            <li>Calculate the CMRR to evaluate performance</li>
+          `,
+          simulator: 'coming_soon.html?circuit=differential-amplifier'
+        },
+        'common-source': {
+          title: 'Common Source Amplifier',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.21 (2).jpeg',
+          description: 'The common source amplifier is a single-stage MOSFET amplifier that provides voltage gain with signal inversion. It\'s widely used for audio and RF applications.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Voltage Gain: A<sub>v</sub> = -g<sub>m</sub> × (r<sub>d</sub> || R<sub>D</sub>)</p>
+            <p>Input Impedance: Z<sub>in</sub> ≈ R<sub>G</sub></p>
+            <p>Output Impedance: Z<sub>out</sub> ≈ R<sub>D</sub> || r<sub>d</sub></p>
+          `,
+          instructions: `
+            <li>Set the gate bias voltage for proper operation point</li>
+            <li>Apply a small AC signal to the input</li>
+            <li>Measure the gain and observe the phase inversion</li>
+            <li>Analyze frequency response and bandwidth</li>
+          `,
+          simulator: 'coming_soon.html?circuit=common-source'
+        },
+        'jfet-amplifier': {
+          title: 'JFET Amplifier',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.20 (1).jpeg',
+          description: 'The JFET amplifier uses a junction field-effect transistor for signal amplification. It offers high input impedance and low noise, making it suitable for small signal applications.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Drain Current: I<sub>D</sub> = I<sub>DSS</sub>(1-V<sub>GS</sub>/V<sub>P</sub>)<sup>2</sup></p>
+            <p>Transconductance: g<sub>m</sub> = 2√(I<sub>DSS</sub>I<sub>D</sub>)/|V<sub>P</sub>|</p>
+            <p>Voltage Gain: A<sub>v</sub> = -g<sub>m</sub>R<sub>D</sub></p>
+          `,
+          instructions: `
+            <li>Set gate-source voltage below pinch-off voltage</li>
+            <li>Verify operation in the saturation region</li>
+            <li>Apply input signal and observe amplification</li>
+            <li>Compare JFET performance with MOSFET designs</li>
+          `,
+          simulator: 'coming_soon.html?circuit=jfet-amplifier'
+        },
+        'schmitt-trigger': {
+          title: 'Schmitt Trigger',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.19 (1).jpeg',
+          description: 'A Schmitt trigger is a comparator circuit with hysteresis, providing different threshold voltages for rising and falling input signals to reduce noise sensitivity and prevent oscillation.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Upper Threshold: V<sub>UT</sub> = R<sub>2</sub>/(R<sub>1</sub>+R<sub>2</sub>) × V<sub>CC</sub></p>
+            <p>Lower Threshold: V<sub>LT</sub> = R<sub>2</sub>/(R<sub>1</sub>+R<sub>2</sub>+R<sub>3</sub>) × V<sub>CC</sub></p>
+            <p>Hysteresis: V<sub>H</sub> = V<sub>UT</sub> - V<sub>LT</sub></p>
+          `,
+          instructions: `
+            <li>Apply a slowly varying input signal (like a triangle wave)</li>
+            <li>Observe the sharp transitions at threshold points</li>
+            <li>Measure the hysteresis width</li>
+            <li>Test noise immunity by adding noise to the input</li>
+          `,
+          simulator: 'coming_soon.html?circuit=schmitt-trigger'
+        },
+        'sequential-logic': {
+          title: 'Sequential Logic Circuit',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.19.jpeg',
+          description: 'Sequential logic circuits contain memory elements that store state information, allowing output to depend on both current and previous inputs. Examples include flip-flops and registers.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Setup Time: t<sub>setup</sub> > t<sub>pd</sub> + t<sub>skew</sub></p>
+            <p>Hold Time: t<sub>hold</sub> > t<sub>skew</sub></p>
+            <p>Maximum Clock Frequency: f<sub>max</sub> = 1/(t<sub>pd</sub> + t<sub>setup</sub>)</p>
+          `,
+          instructions: `
+            <li>Initialize the circuit to a known state</li>
+            <li>Apply clock and data signals according to timing diagram</li>
+            <li>Verify correct state transitions</li>
+            <li>Measure setup and hold time requirements</li>
+          `,
+          simulator: 'coming_soon.html?circuit=sequential-logic'
+        },
+        'pll': {
+          title: 'Phase-Locked Loop',
+          image: 'images/WhatsApp Image 2025-04-10 at 14.45.19 (2).jpeg',
+          description: 'A Phase-Locked Loop (PLL) synchronizes an output oscillator with a reference signal in both frequency and phase. Used in clock recovery, frequency synthesis, and modulation.',
+          formulas: `
+            <h4>Key Equations:</h4>
+            <p>Output Frequency: f<sub>out</sub> = N × f<sub>ref</sub></p>
+            <p>Loop Filter: H(s) = (1 + sτ<sub>2</sub>)/(1 + sτ<sub>1</sub>)</p>
+            <p>Lock Range: Δω<sub>L</sub> = 2K<sub>0</sub>K<sub>d</sub></p>
+          `,
+          instructions: `
+            <li>Apply a reference signal within capture range</li>
+            <li>Observe VCO control voltage during acquisition</li>
+            <li>Measure lock time and phase error</li>
+            <li>Test tracking behavior with frequency modulated input</li>
+          `,
+          simulator: 'coming_soon.html?circuit=pll'
+        }
+      };
+      
+      // Add click event listeners to circuit cards that don't have onclick attributes
+      document.querySelectorAll('.circuit-card:not([onclick])').forEach(card => {
+        card.addEventListener('click', function(event) {
+          // Prevent default behavior
+          event.preventDefault();
+          
+          const circuitId = this.getAttribute('data-circuit');
+          const circuitInfo = circuitData[circuitId];
+          
+          if (circuitInfo) {
+            // Populate modal content
+            modalTitle.textContent = circuitInfo.title;
+            modalImage.src = circuitInfo.image;
+            modalDescription.innerHTML = circuitInfo.description;
+            modalFormulas.innerHTML = circuitInfo.formulas;
+            modalInstructions.innerHTML = circuitInfo.instructions;
+            
+            // Set simulator button link
+            simulateBtn.onclick = function() {
+              window.location.href = circuitInfo.simulator;
+            };
+            
+            // Display the modal
+            modal.style.display = 'block';
+          }
+        });
+      });
+      
+      // Close modal when clicking the close button
+      closeModal.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        modal.style.display = 'none';
+      });
+      
+      // Close modal when clicking outside the modal content
+      window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+      
+      // Modal tab switching
+      document.querySelectorAll('.modal-tab').forEach(tab => {
+        tab.addEventListener('click', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          
+          // Remove active class from all tabs
+          document.querySelectorAll('.modal-tab').forEach(t => {
+            t.classList.remove('active');
+          });
+          
+          // Add active class to clicked tab
+          this.classList.add('active');
+          
+          // Hide all tab content
+          document.querySelectorAll('.modal-tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // Show corresponding tab content
+          const tabId = this.getAttribute('data-tab');
+          const tabContent = document.getElementById(tabId);
+          if (tabContent) {
+            tabContent.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- JavaScript for Profile Sidebar Toggle -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Profile sidebar toggle functionality
+      const profileAvatar = document.getElementById('profileAvatar');
+      const profileSidebar = document.getElementById('profileSidebar');
+      const closeSidebar = document.getElementById('closeSidebar');
+      const pageOverlay = document.getElementById('pageOverlay');
+      const signOutBtn = document.querySelector('.sign-out-btn');
+      const deleteAccountBtn = document.querySelector('.delete-account-btn');
+      
+      // Get stat cards for completed, in-progress, and pending
+      const statCards = document.querySelectorAll('.profile-stats .stat-card');
+      
+      if (profileAvatar && profileSidebar) {
+        // Clone and replace to remove any existing listeners
+        const newAvatar = profileAvatar.cloneNode(true);
+        profileAvatar.parentNode.replaceChild(newAvatar, profileAvatar);
+        
+        // Open sidebar when avatar is clicked
+        newAvatar.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          profileSidebar.classList.add('active');
+          pageOverlay.classList.add('active');
+          document.body.style.overflow = 'hidden'; // Prevent scrolling
+        });
+        
+        // Close sidebar when close button is clicked
+        if (closeSidebar) {
+          closeSidebar.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            profileSidebar.classList.remove('active');
+            pageOverlay.classList.remove('active');
+            document.body.style.overflow = ''; // Re-enable scrolling
+          });
+        }
+        
+        // Close sidebar when overlay is clicked
+        if (pageOverlay) {
+          pageOverlay.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            profileSidebar.classList.remove('active');
+            pageOverlay.classList.remove('active');
+            document.body.style.overflow = ''; // Re-enable scrolling
+          });
+        }
+        
+        // Close sidebar when ESC key is pressed
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && profileSidebar.classList.contains('active')) {
+            profileSidebar.classList.remove('active');
+            pageOverlay.classList.remove('active');
+            document.body.style.overflow = ''; // Re-enable scrolling
+          }
+        });
+        
+        // Make profile stat cards clickable
+        statCards.forEach(card => {
+          card.style.cursor = 'pointer';
+          
+          card.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetTab = this.getAttribute('data-tab-target');
+            console.log('Clicked on stat card for tab:', targetTab);
+            
+            // Close the sidebar
+            profileSidebar.classList.remove('active');
+            pageOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Scroll to My Experiments section
+            const experimentsSection = document.querySelector('.experiments-section');
+            if (experimentsSection) {
+              experimentsSection.scrollIntoView({ behavior: 'smooth' });
+              
+              // Activate the corresponding tab
+              setTimeout(() => {
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                const tabContents = document.querySelectorAll('.tab-content');
+                
+                // Find the button for this tab
+                const targetButton = document.querySelector(`.tab-btn[data-tab="${targetTab}"]`);
+                if (targetButton) {
+                  // Remove active class from all tabs and contents
+                  tabButtons.forEach(btn => btn.classList.remove('active'));
+                  tabContents.forEach(content => content.classList.remove('active'));
+                  
+                  // Add active class to target tab button and content
+                  targetButton.classList.add('active');
+                  const targetContent = document.getElementById(targetTab);
+                  if (targetContent) {
+                    targetContent.classList.add('active');
+                  }
+                }
+              }, 500); // Small delay to ensure smooth scrolling completes
+            }
+          });
+        });
+        
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+          // Check for saved theme preference
+          const savedTheme = localStorage.getItem('theme');
+          if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+          }
+          
+          themeToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Toggle theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // Set theme attribute on html element
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            // Save preference
+            localStorage.setItem('theme', newTheme);
+          });
+        }
+        
+        // Sign Out button functionality
+        if (signOutBtn) {
+          signOutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (confirm('Are you sure you want to sign out?')) {
+              // In a real application, this would call a sign out API
+              alert('You have been signed out successfully.');
+              // Redirect to login page or home page
+              window.location.href = 'index.html';
+            }
+          });
+        }
+        
+        // Delete Account button functionality
+        if (deleteAccountBtn) {
+          deleteAccountBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (confirm('WARNING: Are you sure you want to delete your account? This action cannot be undone.')) {
+              if (confirm('All your data will be permanently deleted. Confirm account deletion?')) {
+                // In a real application, this would call an account deletion API
+                alert('Your account has been scheduled for deletion.');
+                // Redirect to home page or login page
+                window.location.href = 'index.html';
+              }
+            }
+          });
+        }
+      }
+    });
+  </script>
+
+  <!-- JavaScript for Experiment Cards -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix experiment card click functionality
+      const experimentCards = document.querySelectorAll('.experiment-card');
+      
+      experimentCards.forEach(card => {
+        // Skip cards with onclick attribute - they handle their own navigation
+        if (card.hasAttribute('onclick')) {
+          return;
+        }
+        
+        // For cards without onclick, handle clicks programmatically
+        // Remove existing handlers to avoid duplicates
+        const newCard = card.cloneNode(true);
+        card.parentNode.replaceChild(newCard, card);
+        
+        // Add fresh event listeners
+        newCard.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Get the circuit title
+          const titleElement = this.querySelector('h3');
+          if (!titleElement) return;
+          
+          const title = titleElement.textContent.trim();
+          
+          // Handle MOSFET circuit differently
+          if (title === 'MOSFET V-I Characteristics') {
+            window.location.href = 'mosfet_simulator.html';
+          } else {
+            // For all other circuits, go to coming soon page
+            const circuitName = title.toLowerCase().replace(/\s+/g, '-');
+            window.location.href = 'coming_soon.html?circuit=' + circuitName;
+          }
+        });
+        
+        // Make the link element work properly
+        const linkElement = newCard.querySelector('.experiment-link');
+        if (linkElement) {
+          linkElement.addEventListener('click', function(e) {
+            // If link has href attribute, let the default behavior work
+            if (this.hasAttribute('href')) {
+              // Only stop propagation, but let the default link behavior happen
+              e.stopPropagation();
+              return;
+            }
+            
+            // For links without href, handle programmatically
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Get parent card's title
+            const titleElement = this.closest('.experiment-card').querySelector('h3');
+            if (!titleElement) return;
+            
+            const title = titleElement.textContent.trim();
+            
+            // Same logic as above
+            if (title === 'MOSFET V-I Characteristics') {
+              window.location.href = 'mosfet_simulator.html';
+            } else {
+              const circuitName = title.toLowerCase().replace(/\s+/g, '-');
+              window.location.href = 'coming_soon.html?circuit=' + circuitName;
+            }
+          });
+        }
+      });
+
+      // Fix activity items click functionality
+      const activityItems = document.querySelectorAll('.activity-item');
+      
+      activityItems.forEach(item => {
+        // Skip items with onclick attribute - they handle their own navigation
+        if (item.hasAttribute('onclick')) {
+          // Just add hover effects for visual feedback
+          item.style.cursor = 'pointer';
+          item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8fafc';
+          });
+          item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+          });
+          return;
+        }
+        
+        // For items without onclick, handle clicks programmatically
+        // Remove existing onclick attributes and handlers
+        const newItem = item.cloneNode(true);
+        item.parentNode.replaceChild(newItem, item);
+        
+        // Add fresh event listeners
+        newItem.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const href = this.getAttribute('data-href');
+          if (href) {
+            window.location.href = href;
+          }
+        });
+        
+        // Make the action button work properly
+        const actionBtn = newItem.querySelector('.action-btn');
+        if (actionBtn) {
+          // If the action button is an anchor tag with href, don't override its behavior
+          if (actionBtn.tagName === 'A' && actionBtn.hasAttribute('href')) {
+            return;
+          }
+          
+          actionBtn.addEventListener('click', function(e) {
+            // Prevent the event from bubbling to the parent
+            e.stopPropagation();
+            
+            const href = this.closest('.activity-item').getAttribute('data-href');
+            if (href) {
+              window.location.href = href;
+            }
+          });
+        }
+      });
+      
+      // Ensure all activity items have a pointer cursor for better UX
+      document.querySelectorAll('.activity-item').forEach(item => {
+        item.style.cursor = 'pointer';
+      });
+    });
+  </script>
+
+  <!-- JavaScript for Navigation Menu -->
+  <script>
+    // No JavaScript needed for navigation - using simple HTML links
+  </script>
+
+  <!-- JavaScript to update welcome greeting based on time of day -->
+  <script>
+    // Immediately update the greeting based on time of day
+    (function() {
+      const timeGreeting = document.getElementById('timeGreeting');
+      if (timeGreeting) {
+        const hour = new Date().getHours();
+        
+        if (hour >= 5 && hour < 12) {
+          timeGreeting.textContent = "morning";
+        } else if (hour >= 12 && hour < 17) {
+          timeGreeting.textContent = "afternoon";
+        } else {
+          timeGreeting.textContent = "evening";
+        }
+      }
+    })();
+  </script>
+
+  <!-- JavaScript for Experiment Tab Switching -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Direct tab switching functionality for experiment tabs
+      const completedTab = document.getElementById('completedTab');
+      const inProgressTab = document.getElementById('inProgressTab');
+      const pendingTab = document.getElementById('pendingTab');
+      
+      // Debug helper function
+      function logTabContent(tabId) {
+        const content = document.getElementById(tabId);
+        console.log(`Tab ${tabId} content:`, content);
+        console.log(`Tab ${tabId} is displayed:`, window.getComputedStyle(content).display);
+        console.log(`Tab ${tabId} has class 'active':`, content.classList.contains('active'));
+      }
+      
+      if (completedTab && inProgressTab && pendingTab) {
+        // Function to handle tab switching
+        function switchTab(tabId) {
+          console.log(`Switching to tab: ${tabId}`);
+          
+          // Get all tab contents
+          const allTabContents = document.querySelectorAll('.tab-content');
+          const allTabButtons = document.querySelectorAll('.tab-btn');
+          
+          // First hide all tabs and remove active classes
+          allTabContents.forEach(content => {
+            content.classList.remove('active');
+            content.style.display = 'none';
+            content.style.visibility = 'hidden';
+            content.style.opacity = '0';
+          });
+          
+          allTabButtons.forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          // Now show the selected tab and add active class
+          const selectedTab = document.getElementById(tabId);
+          const selectedButton = document.getElementById(tabId + 'Tab');
+          
+          if (selectedTab && selectedButton) {
+            selectedTab.classList.add('active');
+            selectedTab.style.display = 'block';
+            selectedTab.style.visibility = 'visible';
+            selectedTab.style.opacity = '1';
+            selectedButton.classList.add('active');
+            
+            // Force a repaint to ensure images are displayed
+            selectedTab.offsetHeight;
+            
+            // Load any images that might not have loaded yet
+            const images = selectedTab.querySelectorAll('img');
+            images.forEach(img => {
+              // Force reload of the image
+              const currentSrc = img.src;
+              img.src = '';
+              setTimeout(() => {
+                img.src = currentSrc;
+              }, 10);
+            });
+          }
+          
+          // Log debug info
+          logTabContent(tabId);
+        }
+        
+        // Add click event listeners to tabs
+        completedTab.addEventListener('click', function(e) {
+          e.preventDefault();
+          switchTab('completed');
+        });
+        
+        inProgressTab.addEventListener('click', function(e) {
+          e.preventDefault();
+          switchTab('in-progress');
+        });
+        
+        pendingTab.addEventListener('click', function(e) {
+          e.preventDefault();
+          switchTab('pending');
+        });
+        
+        // Special fix for in-progress tab - preload the content
+        const inProgressContent = document.getElementById('in-progress');
+        if (inProgressContent) {
+          // Create a direct click handler for the in-progress tab that works independently
+          inProgressTab.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+              tab.style.display = 'none';
+              tab.classList.remove('active');
+            });
+            
+            // Show in-progress tab
+            inProgressContent.style.display = 'block';
+            inProgressContent.classList.add('active');
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            inProgressTab.classList.add('active');
+            
+            return false;
+          };
+        }
+      }
+      
+      // Additional fallback - add direct click handlers to the tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          if (tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+              tab.style.display = 'none';
+              tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+              selectedTab.style.display = 'block';
+              selectedTab.classList.add('active');
+            }
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- Add styling for text-only cards as fallback -->
+  <style>
+    .experiment-card.text-only {
+      background-color: #f8f5ff; /* Very light purple */
+      border-left: 4px solid #5a2ca0; /* Royal purple */
+    }
+    
+    .experiment-card.text-only .experiment-details {
+      padding: 20px;
+    }
+    
+    .experiment-description {
+      margin: 10px 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* Fix for tab content visibility */
+    .tab-content.active {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* Updated notification colors */
+    .notification.success {
+      background-color: #5a2ca0; /* Royal purple for success */
+    }
+    
+    .notification.error {
+      background-color: var(--danger-color);
+    }
+  </style>
+
+  <!-- JavaScript for Recommended Items -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Find all "Add to List" buttons in the recommended section
+      const addToListButtons = document.querySelectorAll('.recommended-item .action-btn');
+      
+      // Add click event listeners to each button
+      addToListButtons.forEach(button => {
+        // Track state for each button
+        let isAdded = false;
+        
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Get the parent recommended item
+          const recommendedItem = this.closest('.recommended-item');
+          
+          // Get the circuit title from the item
+          const circuitTitle = recommendedItem.querySelector('h3').textContent;
+          
+          if (!isAdded) {
+            // ADD FUNCTIONALITY - First click
+            // Visual confirmation
+            this.textContent = 'Remove';
+            this.style.backgroundColor = '#8e44ad'; // Lighter purple
+            
+            // Animate the item to indicate success
+            recommendedItem.style.transition = 'background-color 0.3s ease';
+            recommendedItem.style.backgroundColor = 'rgba(90, 44, 160, 0.1)'; // Light purple background
+            
+            // Show a temporary notification
+            showNotification(`${circuitTitle} added to your pending experiments!`, '#5a2ca0');
+            
+            // Use the existing function from home.js to update the stats
+            if (typeof updateExperimentStats === 'function') {
+              updateExperimentStats('pending', 1);
+            }
+            
+            // Use the existing function from home.js to add to pending experiments
+            if (typeof addToPendingExperiments === 'function') {
+              addToPendingExperiments(circuitTitle);
+              
+              // Store the card element ID for later removal if needed
+              button.setAttribute('data-card-id', getLatestCardId());
+            }
+            
+            // Update state
+            isAdded = true;
+        } else {
+            // REMOVE FUNCTIONALITY - Second click
+            // Visual confirmation
+            this.textContent = 'Add to List';
+            this.style.backgroundColor = '#5a2ca0'; // Royal purple
+            
+            // Remove background highlight
+            recommendedItem.style.backgroundColor = '';
+            
+            // Show a temporary notification
+            showNotification(`${circuitTitle} removed from your pending experiments.`, '#e74c3c');
+            
+            // Use the existing function from home.js to update the stats
+            if (typeof updateExperimentStats === 'function') {
+              updateExperimentStats('pending', -1);
+            }
+            
+            // Get the card ID to remove
+            const cardId = button.getAttribute('data-card-id');
+            if (cardId) {
+              removeFromPendingExperiments(cardId);
+            }
+            
+            // Update state
+            isAdded = false;
+          }
+        });
+      });
+      
+      // Function to get the latest added card ID
+      function getLatestCardId() {
+        const pendingGrid = document.querySelector('#pending .experiment-grid');
+        if (pendingGrid && pendingGrid.lastElementChild) {
+          // Generate a unique ID if it doesn't exist
+          if (!pendingGrid.lastElementChild.id) {
+            const uniqueId = 'exp-' + Date.now();
+            pendingGrid.lastElementChild.id = uniqueId;
+          }
+          return pendingGrid.lastElementChild.id;
+        }
+        return null;
+      }
+      
+      // Function to remove an experiment from the pending list
+      function removeFromPendingExperiments(cardId) {
+        if (!cardId) return;
+        
+        const card = document.getElementById(cardId);
+        if (card) {
+          // Add fade out animation
+          card.style.transition = 'opacity 0.3s, transform 0.3s';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9)';
+          
+          // Remove after animation completes
+          setTimeout(() => {
+            if (card.parentNode) {
+              card.parentNode.removeChild(card);
+            }
+          }, 300);
+        }
+      }
+      
+      // Function to show a temporary notification
+      function showNotification(message, bgColor = '#059669') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        notification.style.position = 'fixed';
+        notification.style.bottom = '20px';
+        notification.style.right = '20px';
+        notification.style.backgroundColor = bgColor;
+        notification.style.color = 'white';
+        notification.style.padding = '10px 20px';
+        notification.style.borderRadius = '4px';
+        notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        notification.style.zIndex = '1000';
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease';
+        
+        // Add to DOM
+        document.body.appendChild(notification);
+        
+        // Animation: fade in
+        setTimeout(() => {
+          notification.style.opacity = '1';
+        }, 100);
+        
+        // Animation: fade out and remove
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
+      }
+    });
+  </script>
+</body>
+</html> 

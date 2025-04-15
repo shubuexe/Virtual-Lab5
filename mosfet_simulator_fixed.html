@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MOSFET V-I Characteristics Simulator - Electronic Circuit Simulation Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="home.js" defer></script>
+  <script src="back-to-top.js" defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    .simulator-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 0 20px;
+    }
+    @media (min-width: 992px) {
+      .simulator-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .circuit-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .control-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slider-group {
+      margin-bottom: 20px;
+    }
+    .slider-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #1e293b;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+      accent-color: #5a2ca0; /* Royal purple for sliders */
+    }
+    .value-display {
+      color: #475569;
+      font-size: 0.9em;
+    }
+    .chart-container {
+      margin-top: 20px;
+      height: 300px;
+    }
+    .observation-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .observation-table th, .observation-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      text-align: center;
+    }
+    .observation-table th {
+      background-color: #f8f5ff; /* Very light purple */
+      color: #1e293b;
+    }
+    .circuit-diagram {
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    .circuit-diagram svg {
+      width: 100%;
+      height: auto;
+      max-height: 500px;
+    }
+    .clear-button-container {
+      margin: 15px 0;
+      text-align: center;
+    }
+    .clear-button {
+      background-color: #e74c3c; /* Red from our theme */
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .clear-button:hover {
+      background-color: #c0392b; /* Darker red */
+    }
+    
+    /* Simulation Mode Styles */
+    body.simulation-mode .avatar-toggle {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    body.simulation-mode .main-nav ul li:not(:first-child) {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a::before {
+      content: "←";
+      margin-right: 5px;
+      font-size: 1.2em;
+    }
+    
+    body.simulation-mode .header-content {
+      padding: 0.5rem 1rem;
+    }
+    
+    body.simulation-mode .site-title {
+      font-size: 1.3rem;
+    }
+    
+    body.simulation-mode .college-name {
+      font-size: 0.75rem;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      .circuit-section, .control-section {
+        padding: 15px;
+      }
+      .circuit-diagram svg {
+        height: auto;
+        max-height: 400px;
+      }
+    }
+    
+    /* Additional responsive fixes */
+    @media (max-width: 500px) {
+      body {
+        padding: 5px;
+      }
+      .circuit-section, .control-section {
+        padding: 10px;
+      }
+      .circuit-diagram svg {
+        max-height: 300px;
+      }
+      h2 {
+        font-size: 1.2rem;
+      }
+      .slider-group label {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* Fix for SVG display */
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+    
+    /* Instructions Section Styles */
+    .instructions-section {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f8f5ff; /* Very light purple */
+      border-radius: 10px;
+      border-left: 4px solid #5a2ca0; /* Royal purple */
+    }
+    
+    .instructions-section h3 {
+      color: #1e293b;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    
+    .instruction-card {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    .instruction-step {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+    
+    .step-number {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 30px;
+      height: 30px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-content h4 {
+      color: #5a2ca0; /* Royal purple */
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+    }
+    
+    .step-content p {
+      margin: 0 0 10px 0;
+      line-height: 1.5;
+      color: #334155;
+    }
+    
+    .step-content ul, .step-content ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #334155;
+      line-height: 1.6;
+    }
+    
+    .step-content li {
+      margin-bottom: 8px;
+    }
+    
+    .step-content strong {
+      color: #0f172a;
+      font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+      .instruction-step {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .step-number {
+        margin-bottom: 5px;
+      }
+    }
+
+    /* Add back button styling */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      border-radius: 50%;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+      transition: background-color 0.2s;
+    }
+
+    .back-button:hover {
+      background-color: #4a2483; /* Darker purple */
+    }
+
+    /* Active tab style */
+    .main-nav ul li a.active {
+      color: #5a2ca0; /* Royal purple */
+      font-weight: bold;
+      border-bottom: 2px solid #5a2ca0;
+    }
+
+    .main-header {
+      background-color: #5a2ca0; /* Royal purple */
+      color: white;
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Dark Mode Styles */
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --section-bg: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --border-color: #334155;
+    }
+
+    [data-theme="dark"] body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .circuit-section,
+    [data-theme="dark"] .control-section {
+      background: var(--section-bg);
+      border: 1px solid var(--border-color);
+    }
+
+    [data-theme="dark"] .slider-group label,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4 {
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .value-display {
+      color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .observation-table th {
+      background-color: rgba(90, 44, 160, 0.2);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .observation-table td {
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .instructions-section {
+      background-color: rgba(90, 44, 160, 0.1);
+      border-left: 4px solid #9061c2;
+    }
+
+    [data-theme="dark"] .step-content p,
+    [data-theme="dark"] .step-content ul,
+    [data-theme="dark"] .step-content ol,
+    [data-theme="dark"] .step-content li {
+      color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .step-number {
+      background-color: #9061c2;
+    }
+
+    [data-theme="dark"] .step-content h4 {
+      color: #a55eea;
+    }
+
+    [data-theme="dark"] .main-header {
+      background-color: #9061c2;
+    }
+
+    [data-theme="dark"] rect[fill="#f8f5ff"] {
+      fill: #1e293b;
+    }
+
+    [data-theme="dark"] text[fill="#1e293b"] {
+      fill: var(--text-primary);
+    }
+
+    [data-theme="dark"] rect[fill="white"] {
+      fill: #2d3748;
+    }
+
+    [data-theme="dark"] line[stroke="#1e293b"] {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] #wires line {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] #ground line {
+      stroke: #94a3b8;
+    }
+
+    [data-theme="dark"] text[fill="#475569"] {
+      fill: #cbd5e1;
+    }
+
+    /* For wire colors or any other dark elements that need to be visible in dark mode */
+    [data-theme="dark"] path[stroke="#1e293b"] {
+      stroke: #94a3b8;
+    }
+  </style>
+  <script>
+    // This script sets up theme syncing with the main site
+    function syncTheme() {
+      const storedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', storedTheme);
+    }
+    
+    // Apply theme on page load
+    syncTheme();
+    
+    // Listen for changes to theme in localStorage (from main site)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'theme') {
+        syncTheme();
+      }
+    });
+  </script>
+</head>
+<body class="simulation-mode" id="simulator-body">
+  <!-- Profile Sidebar -->
+  <div class="profile-sidebar" id="profileSidebar">
+    <div class="profile-content">
+      <button class="close-sidebar" id="closeSidebar">&times;</button>
+      <div class="sidebar-avatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+      <div class="profile-header">
+        <div class="profile-info">
+          <h2>Shubham Patel</h2>
+          <div class="user-level">ADVANCED LEVEL</div>
+          <p class="user-title">Electronics and Computer Science Engineering Student</p>
+          <div class="progress-container">
+            <span>Progress to next level:</span>
+            <span>75%</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-stats">
+        <div class="stat-card">
+          <span class="stat-value">12</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">3</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">5</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page Overlay -->
+  <div class="page-overlay" id="pageOverlay"></div>
+  
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-content">
+      <!-- NEW DEDICATED BACK BUTTON -->
+      <a href="index.html" class="back-button">&lt;</a>
+      
+      <div class="logo-container">
+        <h1 class="site-title">Electronic Circuit Simulation Lab</h1>
+        <p class="college-name">Shree L.R Tiwari College Of Engineering</p>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <!-- Hide the first menu item that we were trying to style before -->
+          <li style="display:none;"><a href="index.html">Home</a></li>
+          <li><a href="mosfet_simulator.html" class="active">MOSFET Simulator</a></li>
+          <li><a href="bjt_amplifier.html">BJT Amplifier</a></li>
+          <li><a href="inverting_amplifier.html">Inverting Amplifier</a></li>
+          <li><a href="coming_soon.html?circuit=logic-gates">Logic Gates</a></li>
+        </ul>
+      </nav>
+      <!-- Avatar Toggle Button -->
+      <div class="avatar-toggle" id="profileAvatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="simulator-container">
+    <div class="circuit-section">
+      <h2>Circuit Diagram</h2>
+      <div class="circuit-diagram">
+        <!-- SVG content from mosfet_circuit.svg -->
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Circuit Background with clean look -->
+          <rect x="0" y="0" width="800" height="500" fill="#f8f5ff" rx="10" ry="10" />
+          
+          <!-- Very subtle grid for alignment -->
+          <g stroke="#e2e8f0" stroke-width="0.5" stroke-opacity="0.5">
+            <g id="vertical-lines">
+              <line x1="100" y1="50" x2="100" y2="450" />
+              <line x1="200" y1="50" x2="200" y2="450" />
+              <line x1="300" y1="50" x2="300" y2="450" />
+              <line x1="400" y1="50" x2="400" y2="450" />
+              <line x1="500" y1="50" x2="500" y2="450" />
+              <line x1="600" y1="50" x2="600" y2="450" />
+              <line x1="700" y1="50" x2="700" y2="450" />
+            </g>
+            <g id="horizontal-lines">
+              <line x1="50" y1="100" x2="750" y2="100" />
+              <line x1="50" y1="200" x2="750" y2="200" />
+              <line x1="50" y1="300" x2="750" y2="300" />
+              <line x1="50" y1="400" x2="750" y2="400" />
+            </g>
+          </g>
+          
+          <!-- Clean MOSFET Parameters Box -->
+          <g id="parameters-box">
+            <rect x="500" y="50" width="250" height="100" fill="white" stroke="#5a2ca0" stroke-width="1" rx="5" ry="5" />
+            <text x="510" y="75" font-family="Arial" font-size="16" font-weight="bold" fill="#1e293b">MOSFET Parameters:</text>
+            <text x="510" y="100" font-family="Arial" font-size="14" fill="#1e293b">Threshold Voltage (V<tspan font-size="10" baseline-shift="sub">th</tspan>): <tspan id="vth-param-value" fill="#1e293b">2.0V</tspan></text>
+            <text x="510" y="120" font-family="Arial" font-size="14" fill="#1e293b">Transconductance (K): <tspan id="k-param-value" fill="#1e293b">0.5 mA/V²</tspan></text>
+            <text x="510" y="140" font-family="Arial" font-size="14" fill="#1e293b">Channel Length Mod (λ): <tspan id="lambda-param-value" fill="#1e293b">0.02 V⁻¹</tspan></text>
+          </g>
+          
+          <!-- Modern MOSFET Symbol -->
+          <g id="mosfet" transform="translate(250,250)">
+            <!-- Gate line -->
+            <line x1="-40" y1="0" x2="-10" y2="0" stroke="#5a2ca0" stroke-width="2" />
+            
+            <!-- Drain line -->
+            <line x1="0" y1="-40" x2="0" y2="-10" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Source line -->
+            <line x1="0" y1="10" x2="0" y2="40" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Substrate line -->
+            <line x1="-10" y1="20" x2="-10" y2="-20" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Channel region -->
+            <path d="M-10,-10 L0,-10 L0,10 L-10,10" fill="none" stroke="#1e293b" stroke-width="2" />
+            
+            <!-- Arrow for N-channel -->
+            <path d="M0,0 L-6,-5 L-6,5 z" fill="#5a2ca0" stroke="none" />
+            
+            <!-- Labels -->
+            <text x="8" y="-15" font-family="Arial" font-size="14" text-anchor="start" fill="#1e293b">D</text>
+            <text x="8" y="20" font-family="Arial" font-size="14" text-anchor="start" fill="#1e293b">S</text>
+            <text x="-25" y="-8" font-family="Arial" font-size="14" text-anchor="middle" fill="#5a2ca0">G</text>
+            <text x="-25" y="25" font-family="Arial" font-size="14" text-anchor="middle" fill="#1e293b">B</text>
+          </g>
+          
+          <!-- VDS Source -->
+          <g transform="translate(400,200)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#5a2ca0" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#5a2ca0">VDS</text>
+            <text id="vds-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">5.0V</text>
+          </g>
+          
+          <!-- Load Resistor RL -->
+          <g id="load-resistor" transform="translate(350,150)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L0,10 L-5,15 L5,25 L-5,35 L5,45 L-5,55 L5,65 L0,70 L0,80" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rl-path" />
+            <!-- Label -->
+            <text x="15" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RL</text>
+            <text id="rl-value-svg" x="15" y="60" font-family="Arial" font-size="12" fill="#475569">1kΩ</text>
+          </g>
+          
+          <!-- Gate Resistor RG -->
+          <g id="gate-resistor" transform="translate(180,250)">
+            <!-- Zigzag pattern for resistor -->
+            <path d="M0,0 L10,0 L15,-5 L25,5 L35,-5 L45,5 L55,-5 L65,5 L70,0 L80,0" 
+                  fill="none" stroke="#1e293b" stroke-width="2" id="rg-path" />
+            <!-- Label -->
+            <text x="35" y="-10" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">RG</text>
+            <text id="rg-value-svg" x="35" y="-25" font-family="Arial" font-size="12" fill="#475569">100kΩ</text>
+          </g>
+          
+          <!-- VGS Source -->
+          <g transform="translate(100,250)">
+            <circle cx="0" cy="0" r="25" fill="white" stroke="#5a2ca0" stroke-width="2" />
+            <text x="0" y="5" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#5a2ca0">VGS</text>
+            <text id="vgs-source-value" x="0" y="24" font-family="Arial" font-size="12" text-anchor="middle" fill="#475569">3.0V</text>
+          </g>
+          
+          <!-- Capacitor C2 -->
+          <g id="capacitor2" transform="translate(500,200)">
+            <line x1="0" y1="-20" x2="0" y2="-10" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="-10" x2="10" y2="-10" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="0" x2="10" y2="0" stroke="#1e293b" stroke-width="2" />
+            <line x1="0" y1="0" x2="0" y2="20" stroke="#1e293b" stroke-width="2" />
+            <text x="20" y="-5" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">C2</text>
+            <text x="20" y="15" font-family="Arial" font-size="12" fill="#475569">10μF</text>
+          </g>
+          
+          <!-- Ground Symbols -->
+          <g id="ground" transform="translate(350,350)">
+            <line x1="0" y1="-20" x2="0" y2="0" stroke="#1e293b" stroke-width="2" />
+            <line x1="-15" y1="0" x2="15" y2="0" stroke="#1e293b" stroke-width="2" />
+            <line x1="-10" y1="5" x2="10" y2="5" stroke="#1e293b" stroke-width="2" />
+            <line x1="-5" y1="10" x2="5" y2="10" stroke="#1e293b" stroke-width="2" />
+          </g>
+          
+          <!-- Connecting Wires - clean layout -->
+          <g id="wires" stroke="#1e293b" stroke-width="2">
+            <!-- VGS to gate resistor -->
+            <line x1="125" y1="250" x2="180" y2="250" />
+            
+            <!-- Gate resistor to MOSFET gate -->
+            <line x1="260" y1="250" x2="210" y2="250" />
+            
+            <!-- MOSFET source to ground -->
+            <line x1="250" y1="290" x2="250" y2="330" />
+            <line x1="250" y1="330" x2="350" y2="330" />
+            
+            <!-- Load resistor connections -->
+            <line x1="350" y1="70" x2="350" y2="150" />
+            <line x1="350" y1="70" x2="250" y2="70" />
+            <line x1="250" y1="70" x2="250" y2="210" />
+            
+            <!-- VDS connections -->
+            <line x1="350" y1="230" x2="350" y2="330" />
+            <line x1="375" y1="200" x2="350" y2="200" />
+            <line x1="425" y1="200" x2="500" y2="200" />
+            <line x1="500" y1="220" x2="500" y2="330" />
+            <line x1="500" y1="330" x2="350" y2="330" />
+          </g>
+          
+          <!-- Current Flow Indicators -->
+          <g id="current-flow" stroke="#e74c3c" stroke-width="2" fill="none">
+            <polyline points="350,180 350,195" marker-end="url(#arrowhead)" />
+            <polyline points="250,130 250,150" marker-end="url(#arrowhead)" />
+          </g>
+          
+          <!-- Operating Point Info -->
+          <g id="operating-point">
+            <rect x="50" y="380" width="220" height="70" fill="white" stroke="#5a2ca0" stroke-width="1" rx="5" ry="5" />
+            <text x="60" y="400" font-family="Arial" font-size="14" font-weight="bold" fill="#1e293b">Operating Point:</text>
+            <text x="60" y="425" font-family="Arial" font-size="14" fill="#1e293b">Drain Current (I<tspan font-size="10" baseline-shift="sub">D</tspan>): <tspan id="id-value" fill="#8e44ad">0.50mA</tspan></text>
+            <text x="60" y="445" font-family="Arial" font-size="14" fill="#1e293b">Operation Region: <tspan id="region-value" fill="#8e44ad">Saturation</tspan></text>
+          </g>
+          
+          <!-- Title -->
+          <text x="400" y="30" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#1e293b">MOSFET Common Source Amplifier</text>
+          
+          <!-- Arrowhead Definition -->
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#e74c3c" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      
+      <!-- Instructions Section -->
+      <div class="instructions-section">
+        <h3>Experiment Instructions</h3>
+        <div class="instruction-card">
+          <div class="instruction-step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              <h4>Understanding the Circuit</h4>
+              <p>The circuit above shows a common source MOSFET amplifier. The key components include:</p>
+              <ul>
+                <li>MOSFET: The main active device with gate (G), drain (D), source (S), and body/bulk (B) terminals</li>
+                <li>VGS: Gate-source voltage supply that controls the MOSFET operation</li>
+                <li>VDS: Drain-source voltage supply that provides the bias voltage</li>
+                <li>RL: Load resistor through which the drain current flows</li>
+                <li>RG: Gate resistor that limits input current</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              <h4>Experiment Objectives</h4>
+              <p>In this experiment, you will:</p>
+              <ul>
+                <li>Identify the different operating regions of a MOSFET (Cut-off, Triode, and Saturation)</li>
+                <li>Observe how changing VGS affects the drain current ID</li>
+                <li>Study the effect of threshold voltage on MOSFET operation</li>
+                <li>Analyze the impact of device parameters like transconductance (K) and channel length modulation (λ)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              <h4>Performing the Experiment</h4>
+              <ol>
+                <li>Start by setting VGS just above the threshold voltage (VTH) and observe the operating region</li>
+                <li>Gradually increase VDS and observe how the drain current changes</li>
+                <li>Click "Add Reading" to record data points for the IV characteristic curve</li>
+                <li>To generate a complete ID-VDS curve, maintain a constant VGS while varying VDS from 0V to 10V</li>
+                <li>For multiple curves, repeat the process with different VGS values (3V, 4V, 5V, etc.)</li>
+                <li>Study the impact of changing threshold voltage (VTH), transconductance (K), and channel length modulation (λ)</li>
+              </ol>
+            </div>
+          </div>
+          
+          <div class="instruction-step">
+            <span class="step-number">4</span>
+            <div class="step-content">
+              <h4>Analysis Tips</h4>
+              <ul>
+                <li>In the <strong>Cut-off region</strong> (VGS < VTH): The drain current is approximately zero</li>
+                <li>In the <strong>Triode region</strong> (VGS > VTH and VDS < VGS-VTH): ID increases with VDS linearly, then non-linearly</li>
+                <li>In the <strong>Saturation region</strong> (VGS > VTH and VDS > VGS-VTH): ID becomes less dependent on VDS and more dependent on VGS</li>
+                <li>Note how increased channel length modulation (λ) causes the drain current to increase with VDS in the saturation region</li>
+                <li>Observe how higher transconductance (K) results in steeper IV curves</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <h2>Control Panel</h2>
+      <div class="slider-group">
+        <label for="vgsSlider">Gate-Source Voltage (VGS):</label>
+        <input type="range" id="vgsSlider" min="0" max="10" step="0.1" value="3">
+        <span class="value-display">3.0 V</span>
+      </div>
+      <div class="slider-group">
+        <label for="vdsSlider">Drain-Source Voltage (VDS):</label>
+        <input type="range" id="vdsSlider" min="0" max="10" step="0.1" value="5">
+        <span class="value-display">5.0 V</span>
+      </div>
+      <div class="slider-group">
+        <label for="vthSlider">Threshold Voltage (VTH):</label>
+        <input type="range" id="vthSlider" min="0" max="5" step="0.1" value="2">
+        <span class="value-display">2.0 V</span>
+      </div>
+      <div class="slider-group">
+        <label for="kSlider">Transconductance (K):</label>
+        <input type="range" id="kSlider" min="0.1" max="2" step="0.1" value="0.5">
+        <span class="value-display">0.5 mA/V²</span>
+      </div>
+      <div class="slider-group">
+        <label for="lambdaSlider">Channel Length Modulation (λ):</label>
+        <input type="range" id="lambdaSlider" min="0" max="0.1" step="0.01" value="0.02">
+        <span class="value-display">0.02 V⁻¹</span>
+      </div>
+      <div class="slider-group">
+        <label for="rlSlider">Load Resistance (RL):</label>
+        <input type="range" id="rlSlider" min="0.1" max="10" step="0.1" value="1">
+        <span class="value-display">1 kΩ</span>
+      </div>
+      <div class="slider-group">
+        <label for="rgSlider">Gate Resistance (RG):</label>
+        <input type="range" id="rgSlider" min="10" max="1000" step="10" value="100">
+        <span class="value-display">100 kΩ</span>
+      </div>
+      
+      <div class="clear-button-container">
+        <button id="clearDataBtn" class="clear-button">Clear Data</button>
+      </div>
+      
+      <div class="chart-container">
+        <canvas id="viChart"></canvas>
+      </div>
+      
+      <h3>Observation Table</h3>
+      <table class="observation-table">
+        <thead>
+          <tr>
+            <th>VGS (V)</th>
+            <th>VDS (V)</th>
+            <th>ID (mA)</th>
+            <th>Region</th>
+          </tr>
+        </thead>
+        <tbody id="observationTable">
+          <!-- This should be empty - no pre-filled data -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // Initialize Chart.js
+    const ctx = document.getElementById('viChart').getContext('2d');
+    const viChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Drain Current (ID) vs Drain-Source Voltage (VDS)',
+          data: [],
+          borderColor: '#5a2ca0',
+          backgroundColor: 'rgba(90, 44, 160, 0.1)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'VDS (V)'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'ID (mA)'
+            }
+          }
+        }
+      }
+    });
+    
+    // Get DOM elements
+    const elements = {
+      vgsSlider: document.getElementById('vgsSlider'),
+      vdsSlider: document.getElementById('vdsSlider'),
+      vthSlider: document.getElementById('vthSlider'),
+      kSlider: document.getElementById('kSlider'),
+      lambdaSlider: document.getElementById('lambdaSlider'),
+      rlSlider: document.getElementById('rlSlider'),
+      rgSlider: document.getElementById('rgSlider'),
+      observationTable: document.getElementById('observationTable')
+    };
+    
+    // Add event listeners to sliders
+    Object.values(elements).forEach(element => {
+      if (element.tagName === 'INPUT') {
+        element.addEventListener('input', updateValues);
+      }
+    });
+    
+    // Add event listener to clear button
+    document.getElementById('clearDataBtn').addEventListener('click', clearData);
+    
+    // Function to clear data
+    function clearData() {
+      // Clear observation table
+      elements.observationTable.innerHTML = '';
+      
+      // Clear chart data but keep the current point
+      const vds = parseFloat(elements.vdsSlider.value);
+      const result = calculateID(
+        parseFloat(elements.vgsSlider.value),
+        vds,
+        parseFloat(elements.vthSlider.value),
+        parseFloat(elements.kSlider.value),
+        parseFloat(elements.lambdaSlider.value)
+      );
+      
+      viChart.data.labels = [vds.toFixed(1)];
+      viChart.data.datasets[0].data = [result.current];
+      viChart.update();
+    }
+    
+    // Calculate drain current
+    function calculateID(vgs, vds, vth, k, lambda) {
+      let id = 0;
+      let region = '';
+      
+      if (vgs <= vth) {
+        region = 'Cut-off';
+      } else if (vds < (vgs - vth)) {
+        id = k * ((vgs - vth - vds/2) * vds) * (1 + lambda * vds);
+        region = 'Triode';
+      } else {
+        id = (k/2) * Math.pow(vgs - vth, 2) * (1 + lambda * vds);
+        region = 'Saturation';
+      }
+      
+      return {
+        current: id,
+        region: region
+      };
+    }
+    
+    // Update values and chart
+    function updateValues() {
+      const vgs = parseFloat(elements.vgsSlider.value);
+      const vds = parseFloat(elements.vdsSlider.value);
+      const vth = parseFloat(elements.vthSlider.value);
+      const k = parseFloat(elements.kSlider.value);
+      const lambda = parseFloat(elements.lambdaSlider.value);
+      
+      // Update displays
+      elements.vgsSlider.nextElementSibling.textContent = vgs.toFixed(1) + ' V';
+      elements.vdsSlider.nextElementSibling.textContent = vds.toFixed(1) + ' V';
+      elements.vthSlider.nextElementSibling.textContent = vth.toFixed(1) + ' V';
+      elements.kSlider.nextElementSibling.textContent = k.toFixed(1) + ' mA/V²';
+      elements.lambdaSlider.nextElementSibling.textContent = lambda.toFixed(2) + ' V⁻¹';
+      elements.rlSlider.nextElementSibling.textContent = elements.rlSlider.value + ' kΩ';
+      elements.rgSlider.nextElementSibling.textContent = elements.rgSlider.value + ' kΩ';
+      
+      // Calculate current
+      const result = calculateID(vgs, vds, vth, k, lambda);
+      
+      // Update observation table - show only the current values, not appending rows
+      const rowData = `
+        <td>${vgs.toFixed(1)}</td>
+        <td>${vds.toFixed(1)}</td>
+        <td>${result.current.toFixed(2)}</td>
+        <td>${result.region}</td>
+      `;
+      
+      // Check if we have an existing row, otherwise create a new one
+      let currentRow = elements.observationTable.querySelector('tr');
+      if (!currentRow) {
+        currentRow = document.createElement('tr');
+        elements.observationTable.appendChild(currentRow);
+      }
+      currentRow.innerHTML = rowData;
+      
+      // Update circuit diagram values with enhanced visual effects
+      updateCircuitValues(vgs, vds, result.current, result.region);
+      
+      // Note: We're not updating the chart here anymore
+      // This will only happen when "Add Reading" is clicked
+    }
+    
+    // This function will only be called when "Add Reading" button is clicked
+    function updateChart(vds, id) {
+      // Add the new data point to the chart
+      viChart.data.labels.push(vds.toFixed(1));
+      viChart.data.datasets[0].data.push(id);
+      
+      // Keep a reasonable number of points for a smooth curve (up to 50 points)
+      if (viChart.data.labels.length > 50) {
+        viChart.data.labels.shift();
+        viChart.data.datasets[0].data.shift();
+      }
+      
+      viChart.update();
+    }
+    
+    // Function to add a reading to the table and update the chart
+    function addReading() {
+      const vgs = parseFloat(elements.vgsSlider.value);
+      const vds = parseFloat(elements.vdsSlider.value);
+      const vth = parseFloat(elements.vthSlider.value);
+      const k = parseFloat(elements.kSlider.value);
+      const lambda = parseFloat(elements.lambdaSlider.value);
+      
+      // Calculate current
+      const result = calculateID(vgs, vds, vth, k, lambda);
+      
+      // Add to observation table
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${vgs.toFixed(1)}</td>
+        <td>${vds.toFixed(1)}</td>
+        <td>${result.current.toFixed(2)}</td>
+        <td>${result.region}</td>
+      `;
+      elements.observationTable.appendChild(row);
+      
+      // Now update the chart with this reading
+      updateChart(vds, result.current);
+      
+      // Visual feedback that the point was added - flash the chart container
+      const chartContainer = document.querySelector('.chart-container');
+      chartContainer.style.transition = 'background-color 0.3s';
+      chartContainer.style.backgroundColor = 'rgba(90, 44, 160, 0.1)'; // Light royal purple
+      setTimeout(() => {
+        chartContainer.style.backgroundColor = 'transparent';
+      }, 300);
+    }
+    
+    // Update circuit diagram values with enhanced visual effects
+    function updateCircuitValues(vgs, vds, id, region) {
+      // Update the text in SVG
+      document.getElementById('vgs-source-value').textContent = vgs.toFixed(1) + 'V';
+      document.getElementById('vds-source-value').textContent = vds.toFixed(1) + 'V';
+      document.getElementById('id-value').textContent = id.toFixed(2) + 'mA';
+      document.getElementById('region-value').textContent = region;
+      
+      // Update interactive components in the circuit diagram with animation
+      const vgsSourceValue = document.getElementById('vgs-source-value');
+      const vdsSourceValue = document.getElementById('vds-source-value');
+      const rgValueSvg = document.getElementById('rg-value-svg');
+      const rlValueSvg = document.getElementById('rl-value-svg');
+      
+      // Apply visual changes with animation
+      vgsSourceValue.textContent = vgs.toFixed(1) + 'V';
+      vdsSourceValue.textContent = vds.toFixed(1) + 'V';
+      rgValueSvg.textContent = elements.rgSlider.value + 'kΩ';
+      rlValueSvg.textContent = elements.rlSlider.value + 'kΩ';
+      
+      // Add pulsing effect to voltage sources based on value
+      const vgsCircle = vgsSourceValue.parentNode.querySelector('circle');
+      const vdsCircle = vdsSourceValue.parentNode.querySelector('circle');
+      
+      if (vgsCircle) {
+        // Change color based on voltage level
+        const vgsHue = Math.min(200, Math.max(0, vgs * 20)); // 0-10V maps to hue 0-200
+        vgsCircle.setAttribute('fill', `hsla(${vgsHue}, 90%, 90%, 0.8)`);
+        vgsCircle.setAttribute('r', 30 + vgs);
+        
+        // Add pulse animation
+        if (!vgsCircle.hasAttribute('data-animated')) {
+          vgsCircle.setAttribute('data-animated', 'true');
+          const pulseAnimate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+          pulseAnimate.setAttribute('attributeName', 'r');
+          pulseAnimate.setAttribute('values', `${30 + vgs};${33 + vgs};${30 + vgs}`);
+          pulseAnimate.setAttribute('dur', '2s');
+          pulseAnimate.setAttribute('repeatCount', 'indefinite');
+          vgsCircle.appendChild(pulseAnimate);
+        }
+      }
+      
+      if (vdsCircle) {
+        // Change color based on voltage level
+        const vdsHue = Math.min(200, Math.max(0, vds * 20)); // 0-10V maps to hue 0-200
+        vdsCircle.setAttribute('fill', `hsla(${vdsHue}, 90%, 90%, 0.8)`);
+        vdsCircle.setAttribute('r', 30 + vds);
+        
+        // Add pulse animation
+        if (!vdsCircle.hasAttribute('data-animated')) {
+          vdsCircle.setAttribute('data-animated', 'true');
+          const pulseAnimate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+          pulseAnimate.setAttribute('attributeName', 'r');
+          pulseAnimate.setAttribute('values', `${30 + vds};${33 + vds};${30 + vds}`);
+          pulseAnimate.setAttribute('dur', '2s');
+          pulseAnimate.setAttribute('repeatCount', 'indefinite');
+          vdsCircle.appendChild(pulseAnimate);
+        }
+      }
+      
+      // Visualize resistors based on values
+      const rlPath = document.querySelector('#rl-path');
+      const rgPath = document.querySelector('#rg-path');
+      
+      if (rlPath) {
+        // Adjust zigzag pattern size based on resistance
+        const rlValue = parseFloat(elements.rlSlider.value);
+        const factor = Math.max(0.5, Math.min(2, rlValue / 5)); // Scale between 0.5-2x for 0.1-10kΩ
+        rlPath.setAttribute('stroke-width', 2 * factor);
+        rlPath.setAttribute('stroke', `hsl(${180 - rlValue * 18}, 70%, 40%)`); // Color changes with resistance
+      }
+      
+      if (rgPath) {
+        // Adjust zigzag pattern size based on resistance
+        const rgValue = parseFloat(elements.rgSlider.value);
+        const factor = Math.max(0.5, Math.min(2, rgValue / 500)); // Scale between 0.5-2x for 10-1000kΩ
+        rgPath.setAttribute('stroke-width', 2 * factor);
+        rgPath.setAttribute('stroke', `hsl(${180 - rgValue / 5.5}, 70%, 40%)`); // Color changes with resistance
+      }
+      
+      // Adjust MOSFET channel based on threshold voltage
+      const mosfetChannel = document.querySelector('#mosfet path');
+      if (mosfetChannel) {
+        const vth = parseFloat(elements.vthSlider.value);
+        const activeChannelWidth = Math.max(1, 3 * (vgs > vth ? (vgs - vth) / vth : 0));
+        mosfetChannel.setAttribute('stroke-width', activeChannelWidth);
+        
+        // Change channel color based on region
+        if (region === 'Cut-off') {
+          mosfetChannel.setAttribute('stroke', '#6b7280'); // Gray for cut-off
+        } else if (region === 'Triode') {
+          mosfetChannel.setAttribute('stroke', '#5a2ca0'); // Royal purple for triode
+        } else {
+          mosfetChannel.setAttribute('stroke', '#ef4444'); // Red for saturation
+        }
+      }
+      
+      // Adjust current indicator thickness and add animation based on current magnitude
+      const currentPaths = document.querySelectorAll('#current-flow polyline');
+      if (currentPaths.length > 0) {
+        // Scale stroke width based on current (thicker for higher current)
+        const basethickness = 2;
+        const maxThickness = 6;
+        const scaleFactor = 0.8; // Adjust this for sensitivity
+        const newThickness = Math.min(basethickness + id * scaleFactor, maxThickness);
+        
+        // Change current color based on region
+        let currentColor = '#ef4444'; // Default red
+        if (region === 'Cut-off') {
+          currentColor = '#6b7280'; // Gray for cut-off
+        } else if (region === 'Triode') {
+          currentColor = '#5a2ca0'; // Royal purple for triode
+        } else {
+          currentColor = '#ef4444'; // Red for saturation
+        }
+        
+        // Apply to all current indicators
+        currentPaths.forEach(path => {
+          path.setAttribute('stroke-width', newThickness);
+          path.setAttribute('stroke', currentColor);
+          
+          // Add flowing animation for current
+          if (id > 0.1 && !path.hasAttribute('data-animated') && region !== 'Cut-off') {
+            path.setAttribute('data-animated', 'true');
+            const flowAnimate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            flowAnimate.setAttribute('attributeName', 'stroke-dasharray');
+            flowAnimate.setAttribute('values', '1,12;12,1;1,12');
+            flowAnimate.setAttribute('dur', (3 / id) + 's'); // Faster animation for higher current
+            flowAnimate.setAttribute('repeatCount', 'indefinite');
+            path.appendChild(flowAnimate);
+            
+            // Add dash pattern to simulate flow
+            path.setAttribute('stroke-dasharray', '1,12');
+          } else if (region === 'Cut-off' || id <= 0.1) {
+            // Remove animation in cut-off region
+            path.removeAttribute('data-animated');
+            path.setAttribute('stroke-dasharray', '');
+            const animate = path.querySelector('animate');
+            if (animate) path.removeChild(animate);
+          }
+        });
+        
+        // Update arrowhead color to match current
+        const arrowhead = document.querySelector('#arrowhead polygon');
+        if (arrowhead) {
+          arrowhead.setAttribute('fill', currentColor);
+        }
+      }
+      
+      // Update MOSFET parameters in display box with color highlights
+      const thresholdText = getElementByTextContent('text', 'Threshold Voltage', true);
+      const transconductanceText = getElementByTextContent('text', 'Transconductance', true);
+      const lambdaText = getElementByTextContent('text', 'Channel Length Mod', true);
+      
+      if (thresholdText) {
+        // Extract the text node and replace just the value with highlighted value
+        let textContent = thresholdText.textContent;
+        textContent = textContent.replace(/[0-9.]+V$/, elements.vthSlider.value + 'V');
+        thresholdText.textContent = textContent;
+        
+        // Highlight text with color based on whether Vgs > Vth
+        if (vgs > parseFloat(elements.vthSlider.value)) {
+          thresholdText.setAttribute('fill', '#8e44ad'); // Light purple when exceeded
+        } else {
+          thresholdText.setAttribute('fill', '#e74c3c'); // Red from theme when below
+        }
+      }
+      
+      // Update the parameter values in the box directly
+      document.getElementById('vth-param-value').textContent = elements.vthSlider.value + 'V';
+      document.getElementById('k-param-value').textContent = elements.kSlider.value + ' mA/V²';
+      document.getElementById('lambda-param-value').textContent = elements.lambdaSlider.value + ' V⁻¹';
+      
+      if (transconductanceText) {
+        let textContent = transconductanceText.textContent;
+        textContent = textContent.replace(/[0-9.]+\s+mA\/V²/, elements.kSlider.value + ' mA/V²');
+        transconductanceText.textContent = textContent;
+      }
+      
+      if (lambdaText) {
+        let textContent = lambdaText.textContent;
+        textContent = textContent.replace(/[0-9.]+\s+V⁻¹/, elements.lambdaSlider.value + ' V⁻¹');
+        lambdaText.textContent = textContent;
+      }
+      
+      // Update region display with color
+      const regionValue = document.getElementById('region-value');
+      if (regionValue) {
+        if (region === 'Cut-off') {
+          regionValue.setAttribute('fill', '#6b7280'); // Gray for cut-off
+        } else if (region === 'Triode') {
+          regionValue.setAttribute('fill', '#5a2ca0'); // Royal purple for triode
+        } else {
+          regionValue.setAttribute('fill', '#ef4444'); // Red for saturation
+        }
+      }
+    }
+    
+    // Helper function to find elements by content
+    function getElementByTextContent(tagName, text, partialMatch = false) {
+      const elements = document.getElementsByTagName(tagName);
+      for (let i = 0; i < elements.length; i++) {
+        if (partialMatch && elements[i].textContent.includes(text)) {
+          return elements[i];
+        } else if (elements[i].textContent === text) {
+          return elements[i];
+        }
+      }
+      return null;
+    }
+    
+    // Add a button to manually add a reading
+    const addReadingBtn = document.createElement('button');
+    addReadingBtn.textContent = 'Add Reading';
+    addReadingBtn.className = 'clear-button';
+    addReadingBtn.style.backgroundColor = '#5a2ca0'; // Royal purple
+    addReadingBtn.style.marginLeft = '10px';
+    addReadingBtn.addEventListener('click', addReading);
+
+    // Add hover effect
+    addReadingBtn.addEventListener('mouseover', function() {
+      this.style.backgroundColor = '#4a2483'; // Darker purple
+    });
+    addReadingBtn.addEventListener('mouseout', function() {
+      this.style.backgroundColor = '#5a2ca0'; // Royal purple
+    });
+    
+    // Insert it next to the Clear Data button
+    const clearButtonContainer = document.querySelector('.clear-button-container');
+    clearButtonContainer.appendChild(addReadingBtn);
+    
+    // Initialize
+    updateValues();
+    
+    // Check if we came from a specific activity
+    function getURLParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Set initial state based on activity source
+    function initializeFromActivity() {
+      const activitySource = getURLParameter('activity');
+      
+      if (activitySource === 'completed') {
+        // Set values for completed activity (100%)
+        elements.vgsSlider.value = 4.0;
+        elements.vdsSlider.value = 8.0;
+        elements.vthSlider.value = 2.0;
+        elements.kSlider.value = 0.8;
+        elements.lambdaSlider.value = 0.03;
+        elements.rlSlider.value = 1.0;
+        
+        // Add multiple readings to show a complete experiment
+        updateValues();
+        addReading(); // At VDS = 8.0
+        
+        elements.vdsSlider.value = 1.0;
+        updateValues();
+        addReading(); // At VDS = 1.0
+        
+        elements.vdsSlider.value = 2.0;
+        updateValues();
+        addReading(); // At VDS = 2.0
+        
+        elements.vdsSlider.value = 3.0;
+        updateValues();
+        addReading(); // At VDS = 3.0
+        
+        elements.vdsSlider.value = 4.0;
+        updateValues();
+        addReading(); // At VDS = 4.0
+        
+        elements.vdsSlider.value = 5.0;
+        updateValues();
+        addReading(); // At VDS = 5.0
+        
+        elements.vdsSlider.value = 6.0;
+        updateValues();
+        addReading(); // At VDS = 6.0
+        
+        elements.vdsSlider.value = 7.0;
+        updateValues();
+        addReading(); // At VDS = 7.0
+        
+        // Add a second set with different VGS
+        elements.vgsSlider.value = 3.0;
+        elements.vdsSlider.value = 1.0;
+        updateValues();
+        addReading();
+        
+        elements.vdsSlider.value = 3.0;
+        updateValues();
+        addReading();
+        
+        elements.vdsSlider.value = 5.0;
+        updateValues();
+        addReading();
+        
+        elements.vdsSlider.value = 7.0;
+        updateValues();
+        addReading();
+        
+      } else if (activitySource === 'in-progress') {
+        // Set values for in-progress activity (65%)
+        elements.vgsSlider.value = 3.5;
+        elements.vdsSlider.value = 5.0;
+        elements.vthSlider.value = 2.0;
+        elements.kSlider.value = 0.7;
+        elements.lambdaSlider.value = 0.02;
+        elements.rlSlider.value = 1.2;
+        
+        // Add some readings to show partial completion
+        updateValues();
+        addReading(); // At VDS = 5.0
+        
+        elements.vdsSlider.value = 1.0;
+        updateValues();
+        addReading(); // At VDS = 1.0
+        
+        elements.vdsSlider.value = 2.0;
+        updateValues();
+        addReading(); // At VDS = 2.0
+        
+        elements.vdsSlider.value = 3.0;
+        updateValues();
+        addReading(); // At VDS = 3.0
+        
+        elements.vdsSlider.value = 4.0;
+        updateValues();
+        addReading(); // At VDS = 4.0
+        
+      } else if (activitySource === 'pending') {
+        // Set default values for pending activity (0%)
+        elements.vgsSlider.value = 3.0;
+        elements.vdsSlider.value = 5.0;
+        elements.vthSlider.value = 2.0;
+        elements.kSlider.value = 0.5;
+        elements.lambdaSlider.value = 0.02;
+        elements.rlSlider.value = 1.0;
+        updateValues();
+        
+        // No readings added, just showing empty state
+      }
+    }
+    
+    // Call the initialization function
+    initializeFromActivity();
+  </script>
+</body>
+</html> 

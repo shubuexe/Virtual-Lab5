@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Electronic Circuit Simulation Lab - Coming Soon Page">
+  <title>Simulator Coming Soon - Electronic Circuit Simulation Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .coming-soon-container {
+      text-align: center;
+      padding: 4rem 2rem;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .coming-soon-icon {
+      font-size: 5rem;
+      color: var(--primary-color);
+      margin-bottom: 2rem;
+    }
+    
+    .coming-soon-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    
+    .coming-soon-subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      color: var(--text-secondary);
+    }
+    
+    .coming-soon-text {
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    
+    .countdown {
+      font-size: 1.2rem;
+      background-color: var(--section-bg);
+      padding: 1rem 2rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+    
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .countdown-item {
+      background-color: var(--paper);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      min-width: 5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .countdown-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    .countdown-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    .features-preview {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .feature-item {
+      background-color: var(--paper);
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      width: calc(33.33% - 1rem);
+      min-width: 200px;
+      text-align: left;
+    }
+    
+    .feature-icon {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .action-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 2rem;
+    }
+    
+    .action-button:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    /* Simulation Mode Styles */
+    body.simulation-mode .avatar-toggle {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    body.simulation-mode .main-nav ul li:not(:first-child) {
+      display: none;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+    }
+    
+    body.simulation-mode .main-nav ul li:first-child a::before {
+      content: "←";
+      margin-right: 5px;
+      font-size: 1.2em;
+    }
+    
+    body.simulation-mode .header-content {
+      padding: 0.5rem 1rem;
+    }
+    
+    body.simulation-mode .site-title {
+      font-size: 1.3rem;
+    }
+    
+    body.simulation-mode .college-name {
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body class="simulation-mode">
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-content">
+      <!-- NEW DEDICATED BACK BUTTON -->
+      <a href="index.html" class="back-button">&lt;</a>
+      
+      <div class="logo-container">
+        <h1 class="site-title">Electronic Circuit Simulation Lab</h1>
+        <p class="college-name">Shree L.R Tiwari College Of Engineering</p>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li style="display:none;"><a href="index.html">Home</a></li>
+          <li><a href="mosfet_simulator.html">MOSFET Simulator</a></li>
+          <li><a href="#">BJT Simulator</a></li>
+          <li><a href="#">Op-Amp Circuits</a></li>
+          <li><a href="#">Logic Gates</a></li>
+        </ul>
+      </nav>
+      <!-- Avatar Toggle Button -->
+      <div class="avatar-toggle" id="profileAvatar">
+        <img src="images/WhatsApp Image 2025-04-10 at 11.32.23.jpeg" alt="User Profile Avatar">
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="container">
+    <div class="coming-soon-container">
+      <div class="coming-soon-icon">🚧</div>
+      <h1 class="coming-soon-title">Coming Soon</h1>
+      <h2 class="coming-soon-subtitle" id="circuit-name">Circuit Simulator</h2>
+      
+      <p class="coming-soon-text">
+        We're working hard to create an interactive simulation for this circuit. 
+        Our team of developers and electronic engineers are carefully designing accurate 
+        models and intuitive controls to provide you with the best learning experience.
+      </p>
+      
+      <div class="countdown">
+        <p>Expected release in:</p>
+        <div class="countdown-timer">
+          <div class="countdown-item">
+            <div class="countdown-number" id="days">14</div>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="hours">23</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="minutes">45</div>
+            <div class="countdown-label">Minutes</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="seconds">19</div>
+            <div class="countdown-label">Seconds</div>
+          </div>
+        </div>
+      </div>
+      
+      <h3>Features to Look Forward To:</h3>
+      <div class="features-preview">
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Interactive Graphs</div>
+          <p>Real-time plotting of circuit behavior under various conditions</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚙️</div>
+          <div class="feature-title">Parametric Analysis</div>
+          <p>Adjust component values to see immediate effects</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📝</div>
+          <div class="feature-title">Data Logging</div>
+          <p>Save and export your simulation results</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📱</div>
+          <div class="feature-title">Mobile Friendly</div>
+          <p>Access the simulator from any device</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🧩</div>
+          <div class="feature-title">Circuit Customization</div>
+          <p>Modify circuit topology for experimentation</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🎓</div>
+          <div class="feature-title">Learning Resources</div>
+          <p>Integrated tutorials and theoretical explanations</p>
+        </div>
+      </div>
+      
+      <a href="index.html" class="action-button">Return to Home</a>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="page-footer">
+    <div class="footer-content">
+      <div class="footer-nav">
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms-of-service.html">Terms of Service</a></li>
+        </ul>
+      </div>
+      <p>&copy; <span id="currentYear"></span> Electronic Circuit Simulation Lab - Shree L.R Tiwari College Of Engineering</p>
+    </div>
+  </footer>
+
+  <script>
+    // Get the circuit name from URL parameter
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get current year for footer
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      
+      // Extract circuit name from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const circuitParam = urlParams.get('circuit');
+      
+      // Format the circuit name
+      if (circuitParam) {
+        // Convert kebab-case to Title Case with spaces
+        const formattedName = circuitParam
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        document.getElementById('circuit-name').textContent = formattedName + ' Simulator';
+        document.title = formattedName + ' Simulator Coming Soon';
+      }
+      
+      // Countdown timer
+      // Set release date to 2 weeks from now
+      const releaseDate = new Date();
+      releaseDate.setDate(releaseDate.getDate() + 14);
+      
+      // Update countdown every second
+      setInterval(function() {
+        const now = new Date().getTime();
+        const distance = releaseDate - now;
+        
+        // Calculate time components
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        // Update display
+        document.getElementById('days').textContent = days;
+        document.getElementById('hours').textContent = hours;
+        document.getElementById('minutes').textContent = minutes;
+        document.getElementById('seconds').textContent = seconds;
+      }, 1000);
+    });
+  </script>
+</body>
+</html> 
